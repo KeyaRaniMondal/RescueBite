@@ -1,5 +1,4 @@
 var R=require("../chunks/ssr/[turbopack]_runtime.js")("server/app/page.js")
-R.c("server/chunks/ssr/RescueBite_RescueBite_src_prisma_users_ts_2a855884._.js")
 R.c("server/chunks/ssr/a9273_next_dist_200584e8._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__31172a94._.js")
 R.c("server/chunks/ssr/a9273_next_dist_ce1ba96c._.js")

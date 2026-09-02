@@ -1,6 +1,31 @@
 {
   "pages": {
-    "/_app": []
+    "/_app": [
+      "static/chunks/a9273_next_dist_compiled_65911ca5._.js",
+      "static/chunks/a9273_next_dist_shared_lib_9d39aad6._.js",
+      "static/chunks/a9273_next_dist_client_c919df18._.js",
+      "static/chunks/a9273_next_dist_5a87732b._.js",
+      "static/chunks/a9273_next_app_88678606.js",
+      "static/chunks/[next]_entry_page-loader_ts_3e69f545._.js",
+      "static/chunks/a9273_react-dom_1a570bdf._.js",
+      "static/chunks/a9273_b48852ad._.js",
+      "static/chunks/[root-of-the-server]__f58fda23._.js",
+      "static/chunks/RescueBite_RescueBite_pages__app_2da965e7._.js",
+      "static/chunks/turbopack-RescueBite_RescueBite_pages__app_92929e84._.js"
+    ],
+    "/_error": [
+      "static/chunks/a9273_next_dist_compiled_65911ca5._.js",
+      "static/chunks/a9273_next_dist_shared_lib_9a51da2b._.js",
+      "static/chunks/a9273_next_dist_client_c919df18._.js",
+      "static/chunks/a9273_next_dist_774486ec._.js",
+      "static/chunks/a9273_next_error_80eeb5ab.js",
+      "static/chunks/[next]_entry_page-loader_ts_39a48209._.js",
+      "static/chunks/a9273_react-dom_1a570bdf._.js",
+      "static/chunks/a9273_b48852ad._.js",
+      "static/chunks/[root-of-the-server]__ba8c64c2._.js",
+      "static/chunks/RescueBite_RescueBite_pages__error_2da965e7._.js",
+      "static/chunks/turbopack-RescueBite_RescueBite_pages__error_761164d1._.js"
+    ]
   },
   "devFiles": [],
   "polyfillFiles": [],

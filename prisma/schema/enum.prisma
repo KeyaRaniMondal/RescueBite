@@ -1,0 +1,17 @@
+enum Role {
+    ADMIN
+    PROVIDER
+    RECEIVER
+}
+
+enum UserStatus {
+    PENDING
+    ACTIVE
+    RESTRICTED
+    UNACTIVE
+}
+
+enum AuthProvider {
+  GOOGLE
+  CREDENTIAL
+}

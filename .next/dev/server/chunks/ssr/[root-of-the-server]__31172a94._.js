@@ -22,7 +22,11 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$RescueBite$2f$RescueBite$2f$
 ;
 const dynamic = "force-dynamic";
 async function Home() {
-    const { listUsers } = await __turbopack_context__.A("[project]/RescueBite/RescueBite/src/prisma/users.ts [app-rsc] (ecmascript, async loader)");
+    const { listUsers } = await (()=>{
+        const e = new Error("Cannot find module '../prisma/users'");
+        e.code = 'MODULE_NOT_FOUND';
+        throw e;
+    })();
     const formatter = new Intl.DateTimeFormat("en", {
         dateStyle: "medium",
         timeStyle: "short"

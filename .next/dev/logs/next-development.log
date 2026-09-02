@@ -1,12 +1,53 @@
-[00:00:01.547] Server  LOG     ✓ Ready in 1070ms
-[00:00:14.326] Server  ERROR   (node:7384) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
-In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+[00:00:02.148] Server  LOG     ✓ Ready in 1315ms
+[00:00:07.269] Server  ERROR   ⨯ ./RescueBite/RescueBite/src/app/page.tsx:5:31
+Module not found: Can't resolve '../prisma/users'
+  3 | export default async function Home() {
+  4 |
+> 5 |   const { listUsers } = await import("../prisma/users");
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |   const formatter = new Intl.DateTimeFormat("en", {
+  7 |     dateStyle: "medium",
+  8 |     timeStyle: "short",
 
-To prepare for this change:
-- If you want the current behavior, explicitly use 'sslmode=verify-full'
-- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
 
-See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
-(Use `node --trace-warnings ...` to show where the warning was created)
-[00:00:15.914] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:08:07.163] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:00:10.553] Browser ERROR   uncaughtError: Error: ./RescueBite/RescueBite/src/app/page.tsx:5:31
+Module not found: Can't resolve '../prisma/users'
+  3 | export default async function Home() {
+  4 |
+> 5 |   const { listUsers } = await import("../prisma/users");
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |   const formatter = new Intl.DateTimeFormat("en", {
+  7 |     dateStyle: "medium",
+  8 |     timeStyle: "short",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:00:10.785] Browser ERROR   ./RescueBite/RescueBite/src/app/page.tsx:5:31
+Module not found: Can't resolve '../prisma/users'
+  3 | export default async function Home() {
+  4 |
+> 5 |   const { listUsers } = await import("../prisma/users");
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |   const formatter = new Intl.DateTimeFormat("en", {
+  7 |     dateStyle: "medium",
+  8 |     timeStyle: "short",
+
+https://nextjs.org/docs/messages/module-not-found
+[00:00:11.001] Browser ERROR   ./RescueBite/RescueBite/src/app/page.tsx:5:31
+Module not found: Can't resolve '../prisma/users'
+  3 | export default async function Home() {
+  4 |
+> 5 |   const { listUsers } = await import("../prisma/users");
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |   const formatter = new Intl.DateTimeFormat("en", {
+  7 |     dateStyle: "medium",
+  8 |     timeStyle: "short",
+
+https://nextjs.org/docs/messages/module-not-found
