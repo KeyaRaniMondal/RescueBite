@@ -2,7 +2,7 @@ import nextjs from "@prisma/composer/nextjs";
 import { compute } from "@prisma/composer-prisma-cloud";
 import { postgres } from "@prisma/composer-prisma-cloud/orm";
 
-import { appContract } from "./src/prisma/composer.ts";
+import { appContract } from "../prisma/composer.ts";
 
 export default compute({
   name: "app",
