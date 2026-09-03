@@ -6,6 +6,10 @@
   "type": "module",
   "scripts": {
     "build": "next build",
+    "format:check":"npx @biomejs/biome format ./src",
+    "format:fix":"npx @biomejs/biome format --write ./src",
+    "lint:check":"npx @biomejs/biome lint ./src",
+    "lint:fix":"npx @biomejs/biome lint --write ./src",
     "composer:deploy": "prisma deploy module.ts",
     "composer:dev": "prisma dev module.ts",
     "contract:emit": "prisma contract emit",
@@ -41,6 +45,7 @@
     "temporal-polyfill": "^1.0.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.12",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
