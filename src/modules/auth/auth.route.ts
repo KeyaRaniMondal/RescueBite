@@ -1,32 +1,21 @@
 import { Router } from "express";
-import type { RequestHandler } from "express";
-import type { ZodSchema } from "zod";
-
+import { UserValidation } from "./auth.validation";
 import { AuthController } from "./auth.controller";
-import { AuthValidation } from "./auth.validation";
+import { validateRequest } from "../../middlewares/validateRequest";
 
 const router = Router();
 
-const validateRequest: (schema: ZodSchema) => RequestHandler =
-	(schema) => (req, res, next) => {
-		const parsed = schema.safeParse(req.body);
-
-		if (!parsed.success) {
-			return res.status(400).json({
-				success: false,
-				message: parsed.error.issues[0]?.message ?? "Invalid input",
-				errors: parsed.error.flatten(),
-			});
-		}
-
-		req.body = parsed.data;
-		return next();
-	};
-
 router.post(
 	"/register",
-	validateRequest(AuthValidation.RegistrationZodSchema),
-	AuthController.register,
+	validateRequest(UserValidation.CustomerRegistrationZodSchema),
+	AuthController.registerCustomer,
 );
 
+router.post(
+	"/login",
+	validateRequest(UserValidation.LoginZodSchema),
+	AuthController.loginUser,
+);
+
+router.post("/refresh-token", AuthController.refreshToken);
 export const AuthRoutes = router;

@@ -1,31 +1,25 @@
-import type { Role } from "@prisma/client"; // adjust to wherever your Role type actually lives
+import { Role } from "../../generated/prisma/browser";
 
-export interface IRegisterPayload {
+
+export interface ILoginUserPayload {
+	email: string;
+	password: string;
+}
+
+export interface IRegisterCustomerPayload {
 	name: string;
 	email: string;
-	username?: string;
 	password: string;
+	role?: Role;
+	customer: {
+		contactNumber?: string;
+	};
+}
+
+export interface IRequestUser {
+	userId: string;
+	email: string;
+	name: string;
 	role: Role;
 }
 
-export interface IRegisteredUser {
-	id: string;
-	email: string;
-	username: string | null;
-	name: string | null;
-	role: Role;
-	createdAt: string;
-}
-
-export interface ILoginPayload {
-	email: string;
-	password: string;
-}
-
-export interface ILoginUser {
-	id: string;
-	email: string;
-	username: string | null;
-	name: string | null;
-	role: Role;
-}
