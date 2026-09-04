@@ -1,37 +1,49 @@
-import { z } from "zod";
+import z from "zod";
+import { Role } from "../../generated/prisma/enums";
 
-const RegistrationZodSchema = z.object({
+const roleValues = Object.values(Role) as [string, ...string[]];
+
+const CustomerRegistrationZodSchema = z.object({
 	name: z
-		.string("Name must be a string")
-		.min(3, "Name must be at least 3 characters long")
-		.max(50, "Name must be at most 50 characters long"),
-	email: z.string().email("A valid email is required"),
-	role: z.enum(["ADMIN", "PROVIDER", "RECEIVER"], {
-		message: "Role must be ADMIN, PROVIDER, or RECEIVER",
-	}),
-	username: z
-		.string()
-		.min(3, "Username must be at least 3 characters long")
-		.max(20, "Username must be at most 20 characters long")
-		.optional(),
+		.string("Not A String!!!!!")
+		.min(3, "Name must atleast 3 characters long!!!")
+		.max(10),
+	email: z.email("Not email!!"),
 	password: z
-		.string("Password must be a string")
-		.min(8, "Password must be at least 8 characters long")
-		.regex(/[a-z]/, "Password must contain at least 1 lowercase letter")
-		.regex(/[A-Z]/, "Password must contain at least 1 uppercase letter")
-		.regex(/[0-9]/, "Password must contain at least 1 number")
-		.regex(
-			/[^A-Za-z0-9]/,
-			"Password must contain at least 1 special character",
-		),
+		.string()
+		.min(8, "Password Must Minimum 8 Characters Long.")
+		.regex(/[a-z]/, "Password must contain atleast 1 Lowercase Letter")
+		.regex(/[A-Z]/, "Password must contain atleast 1 Uppercase Letter")
+
+		.regex(/[0-9]/, "Password must contain atleast 1 Number")
+		.regex(/[^A-Za-z0-9]/, "Password must contain atleast 1 Special Character"),
+	role: z.enum(roleValues).optional(),
+	customer: z
+		.object({
+			contactNumber: z.string().optional(),
+		})
+		.optional(),
+});
+
+const CustomerEmailVerifyZodSchema = z.object({
+	email: z.email("Not email!!"),
+	otp: z.string().length(6),
 });
 
 const LoginZodSchema = z.object({
-	email: z.string("Email must be a string").email("A valid email is required"),
-	password: z.string("Password must be a string").min(1, "Password is required"),
+	email: z.email(),
+	password: z
+		.string()
+		.min(8, "Password Must Minimum 8 Characters Long.")
+		.regex(/[a-z]/, "Password must contain atleast 1 Lowercase Letter")
+		.regex(/[A-Z]/, "Password must contain atleast 1 Uppercase Letter")
+
+		.regex(/[0-9]/, "Password must contain atleast 1 Number")
+		.regex(/[^A-Za-z0-9]/, "Password must contain atleast 1 Special Character"),
 });
 
-export const AuthValidation = {
-	RegistrationZodSchema,
+export const UserValidation = {
+	CustomerRegistrationZodSchema,
+	CustomerEmailVerifyZodSchema,
 	LoginZodSchema,
 };

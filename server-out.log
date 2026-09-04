@@ -1,11 +1,41 @@
 
-> rescuebite@0.1.0 dev:server
-> tsx src/server.ts
+> rescuebite@1.0.0 dev
+> tsx watch src/server.ts
 
 ◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
 Connected to the database successfully.
 Server is running on port 5000
-(node:19164) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+(node:20564) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Error: User not found
+    at Object.loginUser (E:\RescueBite\RescueBite\src\modules\auth\auth.service.ts:39:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async <anonymous> (E:\RescueBite\RescueBite\src\modules\auth\auth.controller.ts:24:17)
+    at async <anonymous> (E:\RescueBite\RescueBite\src\utils\catchAsync.ts:6:4)
+2:27:30 AM [tsx] change in ./src\modules\auth\auth.validation.ts Restarting...
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Connected to the database successfully.
+Server is running on port 5000
+2:27:40 AM [tsx] change in ./src\modules\auth\auth.service.ts Rerunning...
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Connected to the database successfully.
+Server is running on port 5000
+2:27:44 AM [tsx] change in ./src\modules\auth\auth.controller.ts Restarting...
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+Connected to the database successfully.
+Server is running on port 5000
+2:28:13 AM [tsx] change in ./src\app.ts Rerunning...
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Connected to the database successfully.
+Server is running on port 5000
+(node:8724) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
 In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
 
 To prepare for this change:

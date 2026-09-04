@@ -1,25 +1,12 @@
-// import nextjs from "@prisma/composer/nextjs";
-// import { compute } from "@prisma/composer-prisma-cloud";
-// import { postgres } from "@prisma/composer-prisma-cloud/orm";
-
-// import { appContract } from "../prisma/composer.ts";
-
-// export default compute({
-//   name: "app",
-//   deps: {
-//     database: postgres(appContract),
-//   },
-//   build: nextjs({ module: import.meta.url, appDir: "." }),
-// });
 import app from "./app";
 import config from "./config";
-import { connectDatabase } from "../prisma/db.ts";
+import { prisma } from "./lib/prisma";
 
-const PORT = Number(config.port) || 5000;
+const PORT = config.port;
 
 const main = async () => {
 	try {
-		await connectDatabase();
+		await prisma.$connect();
 		console.log("Connected to the database successfully.");
 
 		app.listen(PORT, () => {
@@ -27,6 +14,7 @@ const main = async () => {
 		});
 	} catch (error) {
 		console.error("Error starting the server:", error);
+		await prisma.$disconnect();
 		process.exit(1);
 	}
 };

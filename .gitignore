@@ -5,3 +5,4 @@ dist/
 /.prisma-composer
 .next
 migrations
+/generated/prisma

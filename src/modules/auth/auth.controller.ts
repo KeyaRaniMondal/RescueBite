@@ -1,68 +1,87 @@
 import type { Request, Response } from "express";
-
+import httpStatus from "http-status";
+import { catchAsync } from "../../utils/catchAsync";
+import { sendResponse } from "../../utils/sendResponse";
 import { AuthService } from "./auth.service";
-import { AuthValidation } from "./auth.validation";
 
-const register = async (req: Request, res: Response) => {
-	const parsed = AuthValidation.RegistrationZodSchema.safeParse(req.body);
+const registerCustomer = catchAsync(async (req: Request, res: Response) => {
 
-	if (!parsed.success) {
-		return res.status(400).json({
-			success: false,
-			message: parsed.error.issues[0]?.message ?? "Invalid input",
-			errors: parsed.error.flatten(),
-		});
+	const payload = req.body;
+
+	const user = await AuthService.registerCustomer(payload);
+
+	sendResponse(res, {
+		statusCode: httpStatus.CREATED,
+		success: true,
+		message: "User registered successfully",
+		data: user,
+	});
+});
+
+
+const loginUser = catchAsync(async (req: Request, res: Response) => {
+	const payload = req.body;
+	const result = await AuthService.loginUser(payload);
+	const { accessToken, refreshToken } = result;
+
+	res.cookie("accessToken", accessToken, {
+		httpOnly: true,
+		secure: false,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
+	});
+	res.cookie("refreshToken", refreshToken, {
+		httpOnly: true,
+		secure: false,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+	});
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "User logged in successfully",
+		data: {
+			accessToken,
+			refreshToken,
+		},
+	});
+});
+
+const refreshToken = catchAsync(async (req: Request, res: Response) => {
+	if (!req.cookies.refreshToken) {
+		throw new Error("Refresh token is missing");
 	}
+	const result = await AuthService.refreshToken(req.cookies.refreshToken);
+	const { accessToken, refreshToken: newRefreshToken } = result;
 
-	try {
-		const user = await AuthService.register(parsed.data);
+	res.cookie("accessToken", accessToken, {
+		httpOnly: true,
+		secure: false,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
+	});
+	res.cookie("refreshToken", newRefreshToken, {
+		httpOnly: true,
+		secure: false,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+	});
 
-		return res.status(201).json({
-			success: true,
-			message: "User registered successfully",
-			data: user,
-		});
-	} catch (error) {
-		const status = error instanceof Error && error.message.includes("already exists") ? 409 : 500;
-
-		return res.status(status).json({
-			success: false,
-			message: error instanceof Error ? error.message : "Internal server error",
-		});
-	}
-};
-
-const login = async (req: Request, res: Response) => {
-	const parsed = AuthValidation.LoginZodSchema.safeParse(req.body);
-
-	if (!parsed.success) {
-		return res.status(400).json({
-			success: false,
-			message: parsed.error.issues[0]?.message ?? "Invalid input",
-			errors: parsed.error.flatten(),
-		});
-	}
-
-	try {
-		const user = await AuthService.login(parsed.data);
-
-		return res.status(200).json({
-			success: true,
-			message: "Login successful",
-			data: user,
-		});
-	} catch (error) {
-		const status =
-			error instanceof Error && error.message === "Invalid email or password" ? 401 : 500;
-
-		return res.status(status).json({
-			success: false,
-			message: error instanceof Error ? error.message : "Internal server error",
-		});
-	}
-};
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "New tokens generated successfully",
+		data: {
+			accessToken,
+			refreshToken: newRefreshToken,
+		},
+	});
+});
 
 export const AuthController = {
-	register,
-	login,
+	registerCustomer,
+	loginUser,
+	refreshToken,
+	
 };

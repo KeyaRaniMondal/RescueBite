@@ -74,4 +74,19 @@ app.get("/", async (req: Request, res: Response) => {
 	});
 });
 
+// Global error handler
+app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
+	const message = error instanceof Error ? error.message : "Internal server error";
+	const statusCode = message.includes("already exists")
+		? httpStatus.CONFLICT
+		: httpStatus.INTERNAL_SERVER_ERROR;
+
+	res.status(statusCode).json({
+		success: false,
+		statusCode,
+		message,
+		data: null,
+	});
+});
+
 export default app;
