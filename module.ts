@@ -1,8 +1,9 @@
 import { module } from "@prisma/composer";
 import { postgres } from "@prisma/composer-prisma-cloud/orm";
 
-import { appContract } from "./src/prisma/composer.ts";
-import app from "./src/service.ts";
+
+import { appContract } from "./prisma/composer.ts";
+import app from "./src/app.ts";
 
 export default module("rescuebite", ({ provision }) => {
   const database = provision(

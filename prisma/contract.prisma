@@ -1,21 +1,30 @@
-// // use prisma-next
+// use prisma-next
 
-// model User {
-//   id        Int      @id @default(autoincrement())
-//   email     String   @unique
-//   username  String?
-//   name      String?
-//   posts     Post[]
-//   createdAt TimestamptzString @default(now())
-//   updatedAt temporal.updatedAtString()
-// }
+model User {
+  id        Int      @id @default(autoincrement())
+    name      String?   
+  username  String?
+  email     String   @unique
+  password  String
+  role      Role     @default(RECEIVER)
+  status    UserStatus @default(ACTIVE)
+  authProvider AuthProvider @default(CREDENTIAL)
+  authProviderId String? @unique
+  isDeleted Boolean  @default(false)
 
-// model Post {
-//   id        Int      @id @default(autoincrement())
-//   title     String
-//   content   String?
-//   author    User     @relation(fields: [authorId], references: [id])
-//   authorId  Int
-//   createdAt TimestamptzString @default(now())
-//   updatedAt temporal.updatedAtString()
-// }
+  posts     Post[]
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+  
+  deletedAt DateTime?
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+}
