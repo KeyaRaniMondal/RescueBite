@@ -6,6 +6,9 @@ const RegistrationZodSchema = z.object({
 		.min(3, "Name must be at least 3 characters long")
 		.max(50, "Name must be at most 50 characters long"),
 	email: z.string().email("A valid email is required"),
+	role: z.enum(["ADMIN", "PROVIDER", "RECEIVER"], {
+		message: "Role must be ADMIN, PROVIDER, or RECEIVER",
+	}),
 	username: z
 		.string()
 		.min(3, "Username must be at least 3 characters long")
@@ -23,6 +26,12 @@ const RegistrationZodSchema = z.object({
 		),
 });
 
+const LoginZodSchema = z.object({
+	email: z.string("Email must be a string").email("A valid email is required"),
+	password: z.string("Password must be a string").min(1, "Password is required"),
+});
+
 export const AuthValidation = {
 	RegistrationZodSchema,
+	LoginZodSchema,
 };
