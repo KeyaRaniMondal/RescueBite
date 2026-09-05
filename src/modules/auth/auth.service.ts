@@ -71,7 +71,7 @@ const registerCustomer = async (payload: IRegisterCustomerPayload) => {
 	//path set for otp design file
 	const templatePath = path.join(
 		process.cwd(),
-		"src/app/templates/registrationUserOtp.ejs",
+		"src/templates/registrationUserOtp.ejs",
 	);
 
 	const templateData = {
@@ -158,7 +158,7 @@ const verifyCustomerEmail = async (payload: IVerifyEmailPayload) => {
 
 	const templatePath = path.join(
 		process.cwd(),
-		"src/app/templates/customerWelcome.ejs",
+		"src/templates/welcomeCustomer.ejs",
 	);
 
 	const templateData = {
@@ -170,7 +170,7 @@ const verifyCustomerEmail = async (payload: IVerifyEmailPayload) => {
 	await transporter.sendMail({
 		from: config.email_sender,
 		to: email,
-		subject: "Welcome to HealthCare System",
+		subject: "Welcome to RescueBite",
 		html,
 	});
 

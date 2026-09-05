@@ -1,5 +1,6 @@
 import app from "./app";
 import config from "./config";
+import { transporter } from "./lib/nodemailer";
 import { prisma } from "./lib/prisma";
 import { redisClient } from "./lib/redis";
 
