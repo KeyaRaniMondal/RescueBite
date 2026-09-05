@@ -5,7 +5,6 @@ import { sendResponse } from "../../utils/sendResponse";
 import { AuthService } from "./auth.service";
 
 const registerCustomer = catchAsync(async (req: Request, res: Response) => {
-
 	const payload = req.body;
 
 	const user = await AuthService.registerCustomer(payload);
@@ -17,7 +16,6 @@ const registerCustomer = catchAsync(async (req: Request, res: Response) => {
 		data: user,
 	});
 });
-
 
 const loginUser = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
@@ -83,5 +81,4 @@ export const AuthController = {
 	registerCustomer,
 	loginUser,
 	refreshToken,
-	
 };

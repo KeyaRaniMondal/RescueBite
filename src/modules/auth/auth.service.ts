@@ -7,8 +7,8 @@ import { Role, UserStatus } from "../../generated/prisma/enums";
 import config from "../../config";
 import { JwtPayload, SignOptions } from "jsonwebtoken";
 import { jwtUtils } from "../../utils/jwt";
-
-
+import { redisClient } from "../../lib/redis";
+import crypto from "node:crypto";
 
 const registerCustomer = async (payload: IRegisterCustomerPayload) => {
 	const { name, password } = payload;
@@ -24,6 +24,38 @@ const registerCustomer = async (payload: IRegisterCustomerPayload) => {
 	}
 
 	const hashedPassword = await bcrypt.hash(password, 8);
+
+	//for user registration info storing in redis database untill otp is verified and after that it will be removed from redis
+
+	//for otp
+	const expirationSeconds = 5 * 60;
+	const otpKey = `customer registration otp: ${email}`;
+	const otpValue = crypto.randomInt(100000, 1000000).toString();
+	await redisClient.set(otpKey, otpValue, {
+		expiration: {
+			type: "EX",
+			value: expirationSeconds,
+		},
+	});
+
+	//registration data store untill email gets verified
+	const customerRegistrationKey = `customer-registration-data:${email}`;
+	const redisUserDataPayload = {
+		name,
+		email,
+		password: hashedPassword,
+	};
+
+	await redisClient.set(
+		customerRegistrationKey,
+		JSON.stringify(redisUserDataPayload),
+		{
+			expiration: {
+				type: "EX",
+				value: expirationSeconds,
+			},
+		},
+	);
 
 	const role = payload.role ?? Role.RECEIVER;
 
@@ -48,7 +80,6 @@ const registerCustomer = async (payload: IRegisterCustomerPayload) => {
 
 	return user;
 };
-	
 
 const loginUser = async (payload: ILoginUserPayload) => {
 	const { password } = payload;
@@ -110,8 +141,6 @@ const loginUser = async (payload: ILoginUserPayload) => {
 	};
 };
 
-
-
 const refreshToken = async (token: string) => {
 	const verifiedRefreshToken = jwtUtils.verifyToken(
 		token,
@@ -161,9 +190,8 @@ const refreshToken = async (token: string) => {
 	};
 };
 
-
 export const AuthService = {
 	registerCustomer,
 	loginUser,
-	refreshToken
+	refreshToken,
 };

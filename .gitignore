@@ -6,3 +6,4 @@ dist/
 .next
 migrations
 /generated/prisma
+procs.ps1
