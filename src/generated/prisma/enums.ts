@@ -36,3 +36,14 @@ export const AuthProvider = {
 } as const
 
 export type AuthProvider = (typeof AuthProvider)[keyof typeof AuthProvider]
+
+
+export const BusinessType = {
+  RESTAURANT: 'RESTAURANT',
+  BAKERY: 'BAKERY',
+  CAFE: 'CAFE',
+  GROCERY: 'GROCERY',
+  OTHER: 'OTHER'
+} as const
+
+export type BusinessType = (typeof BusinessType)[keyof typeof BusinessType]

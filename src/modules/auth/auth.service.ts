@@ -21,7 +21,7 @@ import { JwtPayload, SignOptions } from "jsonwebtoken";
 import { transporter } from "../../lib/nodemailer";
 
 const registerCustomer = async (payload: IRegisterCustomerPayload) => {
-	const { name, password, customer: customerData } = payload;
+	const { name, password, role, customer: customerData } = payload;
 
 	const email = payload.email.trim().toLowerCase();
 
@@ -54,6 +54,7 @@ const registerCustomer = async (payload: IRegisterCustomerPayload) => {
 		name,
 		email,
 		password: hashedPassword,
+		role,
 		customer: customerData,
 	};
 
@@ -134,24 +135,28 @@ const verifyCustomerEmail = async (payload: IVerifyEmailPayload) => {
 	const customerPayload: IRegisterCustomerPayload =
 		JSON.parse(rediscustomerData);
 
+	const role = customerPayload.role ?? Role.RECEIVER;
+
 	const createdUser = await prisma.user.create({
 		data: {
 			name: customerPayload.name,
 			email: customerPayload.email,
 			password: customerPayload.password,
-			role: Role.RECEIVER,
+			role,
 			status: UserStatus.ACTIVE,
 			emailVerified: true,
-			customer: {
-				create: {
-					name: customerPayload.name,
-					email: customerPayload.email,
-					contactNumber: customerPayload?.customer?.contactNumber || "",
-				},
-			},
+			customer: role === Role.RECEIVER
+				? {
+						create: {
+							name: customerPayload.name,
+							email: customerPayload.email,
+							contactNumber: customerPayload?.customer?.contactNumber || "",
+						},
+					}
+				: undefined,
 		},
 		omit: { password: true },
-		include: { customer: true },
+		include: { customer: role === Role.RECEIVER },
 	});
 
 	await redisClient.del(customerRegistrationKey);

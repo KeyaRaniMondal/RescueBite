@@ -9,7 +9,9 @@ import express, {
 import httpStatus from "http-status";
 import z from "zod";
 import config from "./config";
+import { AppError } from "./utils/AppError";
 import { AuthRoutes } from "./modules/auth/auth.route";
+import { ProviderRoutes } from "./modules/provider/provider.route";
 
 const app: Application = express();
 
@@ -27,6 +29,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/v1/auth", AuthRoutes);
+app.use("/api/v1/provider", ProviderRoutes);
 
 app.post("/zod", async (req: Request, res: Response, next: NextFunction) => {
 	try {
@@ -71,12 +74,26 @@ app.get("/", async (req: Request, res: Response) => {
 });
 
 // Global error handler
-app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
-	const message =
-		error instanceof Error ? error.message : "Internal server error";
-	const statusCode = message.includes("already exists")
-		? httpStatus.CONFLICT
-		: httpStatus.INTERNAL_SERVER_ERROR;
+app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
+const message =
+	err instanceof Error ? err.message : "Internal server error";
+let statusCode: number = httpStatus.INTERNAL_SERVER_ERROR;
+
+if (err instanceof AppError) {
+	statusCode = err.statusCode;
+} else if (message.includes("already exists")) {
+	statusCode = httpStatus.CONFLICT;
+} else if (message.includes("Authentication required")) {
+	statusCode = httpStatus.UNAUTHORIZED;
+} else if (message.includes("Forbidden")) {
+	statusCode = httpStatus.FORBIDDEN;
+} else if (message.includes("not found")) {
+	statusCode = httpStatus.NOT_FOUND;
+} else if (message.includes("A valid")) {
+	statusCode = httpStatus.BAD_REQUEST;
+} else if (message.includes("must be")) {
+	statusCode = httpStatus.BAD_REQUEST;
+}
 
 	res.status(statusCode).json({
 		success: false,

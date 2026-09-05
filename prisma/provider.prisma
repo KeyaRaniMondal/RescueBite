@@ -1,0 +1,16 @@
+model Provider {
+    id           String       @id @default(uuid())
+    userId       String       @unique
+    user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+    businessName String
+    businessType BusinessType
+    address      String
+    city         String
+    phone        String
+    isVerified   Boolean      @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("providers")
+}

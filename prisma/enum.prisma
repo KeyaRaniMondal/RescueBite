@@ -14,6 +14,14 @@ enum UserStatus {
 }
 
 enum AuthProvider {
-  GOOGLE
-  CREDENTIAL
+    GOOGLE
+    CREDENTIAL
+}
+
+enum BusinessType {
+    RESTAURANT
+    BAKERY
+    CAFE
+    GROCERY
+    OTHER
 }
