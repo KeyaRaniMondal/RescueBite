@@ -11,8 +11,6 @@ import z from "zod";
 import config from "./config";
 import { AuthRoutes } from "./modules/auth/auth.route";
 
-
-
 const app: Application = express();
 
 app.use(
@@ -63,9 +61,7 @@ app.post("/zod", async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // test route
-app.get("/test", async (req: Request, res: Response, next: NextFunction) => {
-	
-});
+app.get("/test", async (req: Request, res: Response, next: NextFunction) => {});
 // Basic route
 app.get("/", async (req: Request, res: Response) => {
 	res.status(httpStatus.OK).json({
@@ -76,7 +72,8 @@ app.get("/", async (req: Request, res: Response) => {
 
 // Global error handler
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
-	const message = error instanceof Error ? error.message : "Internal server error";
+	const message =
+		error instanceof Error ? error.message : "Internal server error";
 	const statusCode = message.includes("already exists")
 		? httpStatus.CONFLICT
 		: httpStatus.INTERNAL_SERVER_ERROR;
