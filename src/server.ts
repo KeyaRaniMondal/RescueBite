@@ -13,6 +13,9 @@ const main = async () => {
 		await redisClient.connect();
 		console.log("Connected to Redis successfully.");
 
+		await transporter.verify();
+		console.log("nodemailer connected successfully");
+
 		app.listen(PORT, () => {
 			console.log(`Server is running on port ${PORT}`);
 		});

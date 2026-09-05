@@ -7,13 +7,43 @@ import { AuthService } from "./auth.service";
 const registerCustomer = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
 
-	const user = await AuthService.registerCustomer(payload);
+	await AuthService.registerCustomer(payload);
 
 	sendResponse(res, {
 		statusCode: httpStatus.CREATED,
 		success: true,
-		message: "User registered successfully",
-		data: user,
+		message: "Verification OTP sent",
+		data: null,
+	});
+});
+
+const verifyCustomerEmail = catchAsync(async (req: Request, res: Response) => {
+	const payload = req.body;
+
+	const result = await AuthService.verifyCustomerEmail(payload);
+	const { accessToken, refreshToken } = result;
+
+	res.cookie("accessToken", accessToken, {
+		httpOnly: true,
+		secure: false,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
+	});
+	res.cookie("refreshToken", refreshToken, {
+		httpOnly: true,
+		secure: false,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+	});
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "User logged in successfully",
+		data: {
+			accessToken,
+			refreshToken,
+		},
 	});
 });
 
@@ -77,8 +107,33 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+	const payload = req.body;
+	await AuthService.forgotPassword(payload);
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: `OTP sent to email ${payload.email}`,
+		data: null,
+	});
+});
+const resetPassword = catchAsync(async (req: Request, res: Response) => {
+	const payload = req.body;
+
+	await AuthService.resetPassword(payload);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Password Changed Successfully",
+		data: null,
+	});
+});
 export const AuthController = {
 	registerCustomer,
+	verifyCustomerEmail,
 	loginUser,
 	refreshToken,
+	forgotPassword,
+	resetPassword,
 };
