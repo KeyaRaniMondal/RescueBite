@@ -12,6 +12,7 @@ import config from "./config";
 import { AppError } from "./utils/AppError";
 import { AuthRoutes } from "./modules/auth/auth.route";
 import { ProviderRoutes } from "./modules/provider/provider.route";
+import { FoodListingRoutes } from "./modules/foodListing/foodListing.route";
 
 const app: Application = express();
 
@@ -30,6 +31,7 @@ app.use(cookieParser());
 
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/provider", ProviderRoutes);
+app.use("/api/v1/food-listing", FoodListingRoutes);
 
 app.post("/zod", async (req: Request, res: Response, next: NextFunction) => {
 	try {

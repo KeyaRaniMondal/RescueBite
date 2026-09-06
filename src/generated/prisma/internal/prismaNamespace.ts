@@ -397,6 +397,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
+  FoodListing: 'FoodListing',
   Provider: 'Provider',
   User: 'User',
   Customer: 'Customer'
@@ -415,10 +416,84 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "provider" | "user" | "customer"
+    modelProps: "foodListing" | "provider" | "user" | "customer"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
+    FoodListing: {
+      payload: Prisma.$FoodListingPayload<ExtArgs>
+      fields: Prisma.FoodListingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FoodListingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FoodListingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FoodListingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FoodListingPayload>
+        }
+        findFirst: {
+          args: Prisma.FoodListingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FoodListingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FoodListingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FoodListingPayload>
+        }
+        findMany: {
+          args: Prisma.FoodListingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FoodListingPayload>[]
+        }
+        create: {
+          args: Prisma.FoodListingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FoodListingPayload>
+        }
+        createMany: {
+          args: Prisma.FoodListingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FoodListingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FoodListingPayload>[]
+        }
+        delete: {
+          args: Prisma.FoodListingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FoodListingPayload>
+        }
+        update: {
+          args: Prisma.FoodListingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FoodListingPayload>
+        }
+        deleteMany: {
+          args: Prisma.FoodListingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FoodListingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FoodListingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FoodListingPayload>[]
+        }
+        upsert: {
+          args: Prisma.FoodListingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FoodListingPayload>
+        }
+        aggregate: {
+          args: Prisma.FoodListingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFoodListing>
+        }
+        groupBy: {
+          args: Prisma.FoodListingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FoodListingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FoodListingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FoodListingCountAggregateOutputType> | number
+        }
+      }
+    }
     Provider: {
       payload: Prisma.$ProviderPayload<ExtArgs>
       fields: Prisma.ProviderFieldRefs
@@ -680,6 +755,28 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const FoodListingScalarFieldEnum = {
+  id: 'id',
+  providerId: 'providerId',
+  foodName: 'foodName',
+  description: 'description',
+  category: 'category',
+  quantity: 'quantity',
+  unit: 'unit',
+  price: 'price',
+  pickupLocation: 'pickupLocation',
+  pickupStartTime: 'pickupStartTime',
+  pickupEndTime: 'pickupEndTime',
+  expiryTime: 'expiryTime',
+  images: 'images',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FoodListingScalarFieldEnum = (typeof FoodListingScalarFieldEnum)[keyof typeof FoodListingScalarFieldEnum]
+
+
 export const ProviderScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -775,6 +872,76 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
+ * Reference to a field of type 'FoodCategory'
+ */
+export type EnumFoodCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FoodCategory'>
+    
+
+
+/**
+ * Reference to a field of type 'FoodCategory[]'
+ */
+export type ListEnumFoodCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FoodCategory[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime[]'
+ */
+export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'FoodStatus'
+ */
+export type EnumFoodStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FoodStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'FoodStatus[]'
+ */
+export type ListEnumFoodStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FoodStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'BusinessType'
  */
 export type EnumBusinessTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BusinessType'>
@@ -792,20 +959,6 @@ export type ListEnumBusinessTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-/**
- * Reference to a field of type 'DateTime'
- */
-export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
-    
-
-
-/**
- * Reference to a field of type 'DateTime[]'
- */
-export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
     
 
 
@@ -834,20 +987,6 @@ export type EnumUserStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'UserStatus[]'
  */
 export type ListEnumUserStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 /**
@@ -1001,6 +1140,7 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
  */
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
+  foodListing?: Prisma.FoodListingOmit
   provider?: Prisma.ProviderOmit
   user?: Prisma.UserOmit
   customer?: Prisma.CustomerOmit

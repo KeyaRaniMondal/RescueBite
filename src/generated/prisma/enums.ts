@@ -47,3 +47,29 @@ export const BusinessType = {
 } as const
 
 export type BusinessType = (typeof BusinessType)[keyof typeof BusinessType]
+
+
+export const FoodCategory = {
+  BAKERY: 'BAKERY',
+  GROCERY: 'GROCERY',
+  PRODUCE: 'PRODUCE',
+  DAIRY: 'DAIRY',
+  MEAT: 'MEAT',
+  PREPARED_MEAL: 'PREPARED_MEAL',
+  BEVERAGE: 'BEVERAGE',
+  OTHER: 'OTHER'
+} as const
+
+export type FoodCategory = (typeof FoodCategory)[keyof typeof FoodCategory]
+
+
+export const FoodStatus = {
+  DRAFT: 'DRAFT',
+  AVAILABLE: 'AVAILABLE',
+  PARTIALLY_RESERVED: 'PARTIALLY_RESERVED',
+  FULLY_RESERVED: 'FULLY_RESERVED',
+  EXPIRED: 'EXPIRED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type FoodStatus = (typeof FoodStatus)[keyof typeof FoodStatus]

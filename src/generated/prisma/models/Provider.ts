@@ -223,6 +223,7 @@ export type ProviderWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Provider"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Provider"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  foodListings?: Prisma.FoodListingListRelationFilter
 }
 
 export type ProviderOrderByWithRelationInput = {
@@ -237,6 +238,7 @@ export type ProviderOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  foodListings?: Prisma.FoodListingOrderByRelationAggregateInput
 }
 
 export type ProviderWhereUniqueInput = Prisma.AtLeast<{
@@ -254,6 +256,7 @@ export type ProviderWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Provider"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Provider"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  foodListings?: Prisma.FoodListingListRelationFilter
 }, "id" | "userId">
 
 export type ProviderOrderByWithAggregationInput = {
@@ -299,6 +302,7 @@ export type ProviderCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutProviderInput
+  foodListings?: Prisma.FoodListingCreateNestedManyWithoutProviderInput
 }
 
 export type ProviderUncheckedCreateInput = {
@@ -312,6 +316,7 @@ export type ProviderUncheckedCreateInput = {
   isVerified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  foodListings?: Prisma.FoodListingUncheckedCreateNestedManyWithoutProviderInput
 }
 
 export type ProviderUpdateInput = {
@@ -325,6 +330,7 @@ export type ProviderUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutProviderNestedInput
+  foodListings?: Prisma.FoodListingUpdateManyWithoutProviderNestedInput
 }
 
 export type ProviderUncheckedUpdateInput = {
@@ -338,6 +344,7 @@ export type ProviderUncheckedUpdateInput = {
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  foodListings?: Prisma.FoodListingUncheckedUpdateManyWithoutProviderNestedInput
 }
 
 export type ProviderCreateManyInput = {
@@ -376,6 +383,11 @@ export type ProviderUncheckedUpdateManyInput = {
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ProviderScalarRelationFilter = {
+  is?: Prisma.ProviderWhereInput
+  isNot?: Prisma.ProviderWhereInput
 }
 
 export type ProviderCountOrderByAggregateInput = {
@@ -422,8 +434,18 @@ export type ProviderNullableScalarRelationFilter = {
   isNot?: Prisma.ProviderWhereInput | null
 }
 
-export type StringFieldUpdateOperationsInput = {
-  set?: string
+export type ProviderCreateNestedOneWithoutFoodListingsInput = {
+  create?: Prisma.XOR<Prisma.ProviderCreateWithoutFoodListingsInput, Prisma.ProviderUncheckedCreateWithoutFoodListingsInput>
+  connectOrCreate?: Prisma.ProviderCreateOrConnectWithoutFoodListingsInput
+  connect?: Prisma.ProviderWhereUniqueInput
+}
+
+export type ProviderUpdateOneRequiredWithoutFoodListingsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProviderCreateWithoutFoodListingsInput, Prisma.ProviderUncheckedCreateWithoutFoodListingsInput>
+  connectOrCreate?: Prisma.ProviderCreateOrConnectWithoutFoodListingsInput
+  upsert?: Prisma.ProviderUpsertWithoutFoodListingsInput
+  connect?: Prisma.ProviderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProviderUpdateToOneWithWhereWithoutFoodListingsInput, Prisma.ProviderUpdateWithoutFoodListingsInput>, Prisma.ProviderUncheckedUpdateWithoutFoodListingsInput>
 }
 
 export type EnumBusinessTypeFieldUpdateOperationsInput = {
@@ -432,10 +454,6 @@ export type EnumBusinessTypeFieldUpdateOperationsInput = {
 
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
 }
 
 export type ProviderCreateNestedOneWithoutUserInput = {
@@ -470,6 +488,74 @@ export type ProviderUncheckedUpdateOneWithoutUserNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProviderUpdateToOneWithWhereWithoutUserInput, Prisma.ProviderUpdateWithoutUserInput>, Prisma.ProviderUncheckedUpdateWithoutUserInput>
 }
 
+export type ProviderCreateWithoutFoodListingsInput = {
+  id?: string
+  businessName: string
+  businessType: $Enums.BusinessType
+  address: string
+  city: string
+  phone: string
+  isVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutProviderInput
+}
+
+export type ProviderUncheckedCreateWithoutFoodListingsInput = {
+  id?: string
+  userId: string
+  businessName: string
+  businessType: $Enums.BusinessType
+  address: string
+  city: string
+  phone: string
+  isVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ProviderCreateOrConnectWithoutFoodListingsInput = {
+  where: Prisma.ProviderWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProviderCreateWithoutFoodListingsInput, Prisma.ProviderUncheckedCreateWithoutFoodListingsInput>
+}
+
+export type ProviderUpsertWithoutFoodListingsInput = {
+  update: Prisma.XOR<Prisma.ProviderUpdateWithoutFoodListingsInput, Prisma.ProviderUncheckedUpdateWithoutFoodListingsInput>
+  create: Prisma.XOR<Prisma.ProviderCreateWithoutFoodListingsInput, Prisma.ProviderUncheckedCreateWithoutFoodListingsInput>
+  where?: Prisma.ProviderWhereInput
+}
+
+export type ProviderUpdateToOneWithWhereWithoutFoodListingsInput = {
+  where?: Prisma.ProviderWhereInput
+  data: Prisma.XOR<Prisma.ProviderUpdateWithoutFoodListingsInput, Prisma.ProviderUncheckedUpdateWithoutFoodListingsInput>
+}
+
+export type ProviderUpdateWithoutFoodListingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  businessType?: Prisma.EnumBusinessTypeFieldUpdateOperationsInput | $Enums.BusinessType
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutProviderNestedInput
+}
+
+export type ProviderUncheckedUpdateWithoutFoodListingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  businessType?: Prisma.EnumBusinessTypeFieldUpdateOperationsInput | $Enums.BusinessType
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type ProviderCreateWithoutUserInput = {
   id?: string
   businessName: string
@@ -480,6 +566,7 @@ export type ProviderCreateWithoutUserInput = {
   isVerified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  foodListings?: Prisma.FoodListingCreateNestedManyWithoutProviderInput
 }
 
 export type ProviderUncheckedCreateWithoutUserInput = {
@@ -492,6 +579,7 @@ export type ProviderUncheckedCreateWithoutUserInput = {
   isVerified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  foodListings?: Prisma.FoodListingUncheckedCreateNestedManyWithoutProviderInput
 }
 
 export type ProviderCreateOrConnectWithoutUserInput = {
@@ -520,6 +608,7 @@ export type ProviderUpdateWithoutUserInput = {
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  foodListings?: Prisma.FoodListingUpdateManyWithoutProviderNestedInput
 }
 
 export type ProviderUncheckedUpdateWithoutUserInput = {
@@ -532,8 +621,38 @@ export type ProviderUncheckedUpdateWithoutUserInput = {
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  foodListings?: Prisma.FoodListingUncheckedUpdateManyWithoutProviderNestedInput
 }
 
+
+/**
+ * Count Type ProviderCountOutputType
+ */
+
+export type ProviderCountOutputType = {
+  foodListings: number
+}
+
+export type ProviderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  foodListings?: boolean | ProviderCountOutputTypeCountFoodListingsArgs
+}
+
+/**
+ * ProviderCountOutputType without action
+ */
+export type ProviderCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProviderCountOutputType
+   */
+  select?: Prisma.ProviderCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ProviderCountOutputType without action
+ */
+export type ProviderCountOutputTypeCountFoodListingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FoodListingWhereInput
+}
 
 
 export type ProviderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -548,6 +667,8 @@ export type ProviderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  foodListings?: boolean | Prisma.Provider$foodListingsArgs<ExtArgs>
+  _count?: boolean | Prisma.ProviderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["provider"]>
 
 export type ProviderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -594,6 +715,8 @@ export type ProviderSelectScalar = {
 export type ProviderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "businessName" | "businessType" | "address" | "city" | "phone" | "isVerified" | "createdAt" | "updatedAt", ExtArgs["result"]["provider"]>
 export type ProviderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  foodListings?: boolean | Prisma.Provider$foodListingsArgs<ExtArgs>
+  _count?: boolean | Prisma.ProviderCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProviderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -606,6 +729,7 @@ export type $ProviderPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   name: "Provider"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    foodListings: Prisma.$FoodListingPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1013,6 +1137,7 @@ readonly fields: ProviderFieldRefs;
 export interface Prisma__ProviderClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  foodListings<T extends Prisma.Provider$foodListingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Provider$foodListingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FoodListingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1450,6 +1575,30 @@ export type ProviderDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many Providers to delete.
    */
   limit?: number
+}
+
+/**
+ * Provider.foodListings
+ */
+export type Provider$foodListingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FoodListing
+   */
+  select?: Prisma.FoodListingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FoodListing
+   */
+  omit?: Prisma.FoodListingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FoodListingInclude<ExtArgs> | null
+  where?: Prisma.FoodListingWhereInput
+  orderBy?: Prisma.FoodListingOrderByWithRelationInput | Prisma.FoodListingOrderByWithRelationInput[]
+  cursor?: Prisma.FoodListingWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FoodListingScalarFieldEnum | Prisma.FoodListingScalarFieldEnum[]
 }
 
 /**
