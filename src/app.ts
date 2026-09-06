@@ -32,6 +32,7 @@ app.use(cookieParser());
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/provider", ProviderRoutes);
 app.use("/api/v1/food-listing", FoodListingRoutes);
+app.use("/api/v1/food-listings", FoodListingRoutes);
 
 app.post("/zod", async (req: Request, res: Response, next: NextFunction) => {
 	try {

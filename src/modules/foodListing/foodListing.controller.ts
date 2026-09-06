@@ -79,7 +79,8 @@ const getMyFoodListings = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllFoodListings = catchAsync(async (req: Request, res: Response) => {
-	const { search, status, category } = req.query;
+	const { search, status, category, minPrice, maxPrice, sortBy, sortOrder } =
+		req.query;
 
 	const normalizedSearch =
 		typeof search === "string" && search.trim()
@@ -116,10 +117,84 @@ const getAllFoodListings = catchAsync(async (req: Request, res: Response) => {
 		);
 	}
 
+	const parsePrice = (raw: unknown, label: string): number | undefined => {
+		if (typeof raw !== "string" || !raw.trim()) {
+			return undefined;
+		}
+
+		const value = Number(raw);
+
+		if (!Number.isFinite(value) || value < 0) {
+			throw new AppError(
+				httpStatus.BAD_REQUEST,
+				`${label} must be a non-negative number`,
+			);
+		}
+
+		return value;
+	};
+
+	const normalizedMinPrice = parsePrice(minPrice, "minPrice");
+	const normalizedMaxPrice = parsePrice(maxPrice, "maxPrice");
+
+	if (
+		normalizedMinPrice !== undefined &&
+		normalizedMaxPrice !== undefined &&
+		normalizedMinPrice > normalizedMaxPrice
+	) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"minPrice cannot be greater than maxPrice",
+		);
+	}
+
+	const sortFields = [
+		"createdAt",
+		"foodName",
+		"category",
+		"price",
+		"pickupStartTime",
+		"expiryTime",
+	] as const;
+
+	const normalizedSortBy =
+		typeof sortBy === "string" && sortBy.trim()
+			? (sortBy.trim() as (typeof sortFields)[number])
+			: undefined;
+
+	if (
+		normalizedSortBy !== undefined &&
+		!sortFields.includes(normalizedSortBy)
+	) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"A valid sort field is required",
+		);
+	}
+
+	const normalizedSortOrder =
+		typeof sortOrder === "string" && sortOrder.trim()
+			? (sortOrder.trim().toLowerCase() as "asc" | "desc")
+			: undefined;
+
+	if (
+		normalizedSortOrder !== undefined &&
+		!["asc", "desc"].includes(normalizedSortOrder)
+	) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"sortOrder must be either 'asc' or 'desc'",
+		);
+	}
+
 	const listings = await FoodListingService.listListings({
 		status: normalizedStatus,
 		category: normalizedCategory,
 		search: normalizedSearch,
+		minPrice: normalizedMinPrice,
+		maxPrice: normalizedMaxPrice,
+		sortBy: normalizedSortBy,
+		sortOrder: normalizedSortOrder,
 	});
 
 	sendResponse(res, {

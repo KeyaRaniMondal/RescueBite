@@ -154,16 +154,42 @@ const getListingById = async (listingId: string): Promise<IFoodListing> => {
 	return toFoodListing(listing);
 };
 
+export type FoodListingSortField =
+	| "createdAt"
+	| "foodName"
+	| "category"
+	| "price"
+	| "pickupStartTime"
+	| "expiryTime";
+
+export type SortOrder = "asc" | "desc";
+
 const listListings = async (options?: {
 	providerId?: string;
 	status?: FoodStatus;
 	category?: FoodCategory;
 	search?: string;
+	minPrice?: number;
+	maxPrice?: number;
+	sortBy?: FoodListingSortField;
+	sortOrder?: SortOrder;
 }): Promise<IFoodListing[]> => {
 	const where: Prisma.FoodListingWhereInput = {
 		...(options?.providerId ? { providerId: options.providerId } : {}),
 		...(options?.status ? { status: options.status } : {}),
 		...(options?.category ? { category: options.category } : {}),
+		...(options?.minPrice !== undefined || options?.maxPrice !== undefined
+			? {
+					price: {
+						...(options?.minPrice !== undefined
+							? { gte: options.minPrice }
+							: {}),
+						...(options?.maxPrice !== undefined
+							? { lte: options.maxPrice }
+							: {}),
+					},
+				}
+			: {}),
 		...(options?.search
 			? {
 					OR: [
@@ -179,10 +205,13 @@ const listListings = async (options?: {
 			: {}),
 	};
 
+	const sortBy = options?.sortBy ?? "createdAt";
+	const sortOrder = options?.sortOrder ?? "desc";
+
 	const listings = await prisma.foodListing.findMany({
 		where,
 		select: LISTING_SELECT,
-		orderBy: { createdAt: "desc" },
+		orderBy: [{ [sortBy]: sortOrder }],
 	});
 
 	return listings.map(toFoodListing);
