@@ -5,6 +5,7 @@ import { AppError } from "../../utils/AppError";
 import { sendResponse } from "../../utils/sendResponse";
 import { FoodListingService } from "./foodListing.service";
 import { FoodListingValidation } from "./foodListing.validation";
+import { FoodCategory, FoodStatus } from "../../generated/prisma/enums";
 import type {
 	ICreateFoodListingPayload,
 	IUpdateFoodListingPayload,
@@ -78,11 +79,48 @@ const getMyFoodListings = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllFoodListings = catchAsync(async (req: Request, res: Response) => {
-	const status = (req.query.status as string | undefined) as
-		| import("../../generated/prisma/enums").FoodStatus
-		| undefined;
+	const { search, status, category } = req.query;
 
-	const listings = await FoodListingService.listListings({ status });
+	const normalizedSearch =
+		typeof search === "string" && search.trim()
+			? search.trim()
+			: undefined;
+
+	const normalizedStatus =
+		typeof status === "string" && status.trim()
+			? (status.trim().toUpperCase() as FoodStatus)
+			: undefined;
+
+	if (
+		normalizedStatus !== undefined &&
+		!Object.values(FoodStatus).includes(normalizedStatus)
+	) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"A valid food status filter is required",
+		);
+	}
+
+	const normalizedCategory =
+		typeof category === "string" && category.trim()
+			? (category.trim().toUpperCase() as FoodCategory)
+			: undefined;
+
+	if (
+		normalizedCategory !== undefined &&
+		!Object.values(FoodCategory).includes(normalizedCategory)
+	) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"A valid food category filter is required",
+		);
+	}
+
+	const listings = await FoodListingService.listListings({
+		status: normalizedStatus,
+		category: normalizedCategory,
+		search: normalizedSearch,
+	});
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,

@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { FoodStatus } from "../../generated/prisma/enums";
+import { Prisma, FoodCategory, FoodStatus } from "../../generated/prisma/client";
 import {
 	ICreateFoodListingPayload,
 	IFoodListing,
@@ -157,10 +157,26 @@ const getListingById = async (listingId: string): Promise<IFoodListing> => {
 const listListings = async (options?: {
 	providerId?: string;
 	status?: FoodStatus;
+	category?: FoodCategory;
+	search?: string;
 }): Promise<IFoodListing[]> => {
-	const where = {
+	const where: Prisma.FoodListingWhereInput = {
 		...(options?.providerId ? { providerId: options.providerId } : {}),
 		...(options?.status ? { status: options.status } : {}),
+		...(options?.category ? { category: options.category } : {}),
+		...(options?.search
+			? {
+					OR: [
+						{ foodName: { contains: options.search, mode: "insensitive" } },
+						{
+							description: { contains: options.search, mode: "insensitive" },
+						},
+						{
+							pickupLocation: { contains: options.search, mode: "insensitive" },
+						},
+					],
+				}
+			: {}),
 	};
 
 	const listings = await prisma.foodListing.findMany({
