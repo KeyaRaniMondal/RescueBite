@@ -7,3 +7,4 @@ dist/
 migrations
 /generated/prisma
 procs.ps1
+server-out.log
