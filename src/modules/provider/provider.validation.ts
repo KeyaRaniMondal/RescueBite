@@ -1,10 +1,7 @@
 import z from "zod";
 import { BusinessType } from "../../generated/prisma/enums";
 
-const businessTypeValues = Object.values(BusinessType) as [
-	string,
-	...string[],
-];
+const businessTypeValues = Object.values(BusinessType) as [string, ...string[]];
 
 const CreateProviderZodSchema = z.object({
 	businessName: z

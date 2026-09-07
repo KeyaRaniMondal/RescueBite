@@ -145,15 +145,16 @@ const verifyCustomerEmail = async (payload: IVerifyEmailPayload) => {
 			role,
 			status: UserStatus.ACTIVE,
 			emailVerified: true,
-			customer: role === Role.RECEIVER
-				? {
-						create: {
-							name: customerPayload.name,
-							email: customerPayload.email,
-							contactNumber: customerPayload?.customer?.contactNumber || "",
-						},
-					}
-				: undefined,
+			customer:
+				role === Role.RECEIVER
+					? {
+							create: {
+								name: customerPayload.name,
+								email: customerPayload.email,
+								contactNumber: customerPayload?.customer?.contactNumber || "",
+							},
+						}
+					: undefined,
 		},
 		omit: { password: true },
 		include: { customer: role === Role.RECEIVER },

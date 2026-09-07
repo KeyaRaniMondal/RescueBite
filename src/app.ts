@@ -13,6 +13,7 @@ import { AppError } from "./utils/AppError";
 import { AuthRoutes } from "./modules/auth/auth.route";
 import { ProviderRoutes } from "./modules/provider/provider.route";
 import { FoodListingRoutes } from "./modules/foodListing/foodListing.route";
+import { ReservationRoutes } from "./modules/reservation/reservation.route";
 
 const app: Application = express();
 
@@ -33,6 +34,8 @@ app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/provider", ProviderRoutes);
 app.use("/api/v1/food-listing", FoodListingRoutes);
 app.use("/api/v1/food-listings", FoodListingRoutes);
+app.use("/api/v1/reservation", ReservationRoutes);
+app.use("/api/v1/reservations", ReservationRoutes);
 
 app.post("/zod", async (req: Request, res: Response, next: NextFunction) => {
 	try {
@@ -78,25 +81,24 @@ app.get("/", async (req: Request, res: Response) => {
 
 // Global error handler
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
-const message =
-	err instanceof Error ? err.message : "Internal server error";
-let statusCode: number = httpStatus.INTERNAL_SERVER_ERROR;
+	const message = err instanceof Error ? err.message : "Internal server error";
+	let statusCode: number = httpStatus.INTERNAL_SERVER_ERROR;
 
-if (err instanceof AppError) {
-	statusCode = err.statusCode;
-} else if (message.includes("already exists")) {
-	statusCode = httpStatus.CONFLICT;
-} else if (message.includes("Authentication required")) {
-	statusCode = httpStatus.UNAUTHORIZED;
-} else if (message.includes("Forbidden")) {
-	statusCode = httpStatus.FORBIDDEN;
-} else if (message.includes("not found")) {
-	statusCode = httpStatus.NOT_FOUND;
-} else if (message.includes("A valid")) {
-	statusCode = httpStatus.BAD_REQUEST;
-} else if (message.includes("must be")) {
-	statusCode = httpStatus.BAD_REQUEST;
-}
+	if (err instanceof AppError) {
+		statusCode = err.statusCode;
+	} else if (message.includes("already exists")) {
+		statusCode = httpStatus.CONFLICT;
+	} else if (message.includes("Authentication required")) {
+		statusCode = httpStatus.UNAUTHORIZED;
+	} else if (message.includes("Forbidden")) {
+		statusCode = httpStatus.FORBIDDEN;
+	} else if (message.includes("not found")) {
+		statusCode = httpStatus.NOT_FOUND;
+	} else if (message.includes("A valid")) {
+		statusCode = httpStatus.BAD_REQUEST;
+	} else if (message.includes("must be")) {
+		statusCode = httpStatus.BAD_REQUEST;
+	}
 
 	res.status(statusCode).json({
 		success: false,

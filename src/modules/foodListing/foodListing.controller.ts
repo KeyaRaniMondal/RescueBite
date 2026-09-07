@@ -83,9 +83,7 @@ const getAllFoodListings = catchAsync(async (req: Request, res: Response) => {
 		req.query;
 
 	const normalizedSearch =
-		typeof search === "string" && search.trim()
-			? search.trim()
-			: undefined;
+		typeof search === "string" && search.trim() ? search.trim() : undefined;
 
 	const normalizedStatus =
 		typeof status === "string" && status.trim()

@@ -45,3 +45,10 @@ enum FoodStatus {
     EXPIRED
     CANCELLED
 }
+
+enum ReservationStatus {
+    RESERVED
+    CANCELLED
+    COMPLETED
+    EXPIRED
+}

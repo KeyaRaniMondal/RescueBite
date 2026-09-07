@@ -1,5 +1,9 @@
 import { prisma } from "../../lib/prisma";
-import { Prisma, FoodCategory, FoodStatus } from "../../generated/prisma/client";
+import {
+	Prisma,
+	FoodCategory,
+	FoodStatus,
+} from "../../generated/prisma/client";
 import {
 	ICreateFoodListingPayload,
 	IFoodListing,
@@ -275,9 +279,7 @@ const updateListing = async (
 			pickupEndTime: payload.pickupEndTime
 				? new Date(payload.pickupEndTime)
 				: undefined,
-			expiryTime: payload.expiryTime
-				? new Date(payload.expiryTime)
-				: undefined,
+			expiryTime: payload.expiryTime ? new Date(payload.expiryTime) : undefined,
 			images: payload.images,
 		},
 		select: LISTING_SELECT,

@@ -1,8 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import {
-	ICreateProviderPayload,
-	IProviderProfile,
-} from "./provider.interface";
+import { ICreateProviderPayload, IProviderProfile } from "./provider.interface";
 
 const toProviderProfile = (provider: {
 	id: string;

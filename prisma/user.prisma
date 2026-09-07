@@ -30,6 +30,8 @@ model Customer {
     email         String
     contactNumber String?
 
+    reservations Reservation[]
+
     createdAt     DateTime @default(now())
     updatedAt     DateTime @updatedAt
 
