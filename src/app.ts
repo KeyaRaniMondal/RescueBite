@@ -16,6 +16,7 @@ import { FoodListingRoutes } from "./modules/foodListing/foodListing.route";
 import { ReservationRoutes } from "./modules/reservation/reservation.route";
 import { AdminRoutes } from "./modules/admin/admin.dashboard.route";
 import { PaymentRoutes } from "./modules/payment/payment.route";
+import { FileUploadRoutes } from "./modules/fileUpload/fileUpload.route";
 
 const app: Application = express();
 
@@ -40,6 +41,7 @@ app.use("/api/v1/reservation", ReservationRoutes);
 app.use("/api/v1/reservations", ReservationRoutes);
 app.use("/api/v1/admin", AdminRoutes);
 app.use("/api/v1/payments", PaymentRoutes);
+app.use("/api/v1/upload", FileUploadRoutes);
 
 app.post("/zod", async (req: Request, res: Response, next: NextFunction) => {
 	try {

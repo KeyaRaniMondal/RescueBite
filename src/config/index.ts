@@ -29,4 +29,7 @@ export default {
 	sslcommerz_fail_url: process.env.SSLCOMMERZ_FAIL_URL!,
 	sslcommerz_cancel_url: process.env.SSLCOMMERZ_CANCEL_URL!,
 	sslcommerz_ipn_url: process.env.SSLCOMMERZ_IPN_URL!,
+	cloudinary_cloud_name: process.env.CLOUDE_NAME!,
+	cloudinary_api_key: process.env.CLOUDINARY_API_KEY!,
+	cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET!,
 };
