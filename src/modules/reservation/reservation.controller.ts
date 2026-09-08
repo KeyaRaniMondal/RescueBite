@@ -47,7 +47,7 @@ const reserveFood = catchAsync(async (req: Request, res: Response) => {
 	sendResponse(res, {
 		statusCode: httpStatus.CREATED,
 		success: true,
-		message: "Food reserved successfully",
+		message: "Food reserved. Complete the payment to finalize",
 		data: reservation,
 	});
 });

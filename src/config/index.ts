@@ -21,4 +21,12 @@ export default {
 	smtp_password: process.env.SMTP_PASSWORD!,
 	smtp_user: process.env.SMTP_USER!,
 	email_sender: process.env.EMAIL_SENDER!,
+	ssl_commerz_store_id: process.env.SSL_COMMERZ_STORE_ID!,
+	ssl_commerz_store_password: process.env.SSL_COMMERZ_STORE_PASSWORD!,
+	sslcommerz_init_url: process.env.SSLCOMMERZ_INIT_URL!,
+	sslcommerz_validation_url: process.env.SSLCOMMERZ_VALIDATION_URL!,
+	sslcommerz_success_url: process.env.SSLCOMMERZ_SUCCESS_URL!,
+	sslcommerz_fail_url: process.env.SSLCOMMERZ_FAIL_URL!,
+	sslcommerz_cancel_url: process.env.SSLCOMMERZ_CANCEL_URL!,
+	sslcommerz_ipn_url: process.env.SSLCOMMERZ_IPN_URL!,
 };

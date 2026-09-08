@@ -8,6 +8,7 @@
  * 🟢 You can import this file directly.
  */
 export type * from "./models/FoodListing";
+export type * from "./models/Payment";
 export type * from "./models/Provider";
 export type * from "./models/Reservation";
 export type * from "./models/User";

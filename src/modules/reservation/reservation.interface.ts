@@ -1,4 +1,4 @@
-import { ReservationStatus } from "../../generated/prisma/enums";
+import { ReservationStatus, PaymentStatus } from "../../generated/prisma/enums";
 
 export interface ICreateReservationPayload {
 	listingId: string;
@@ -21,4 +21,13 @@ export interface IReservation {
 	completedAt: string | null;
 	createdAt: string;
 	updatedAt: string;
+}
+
+export interface ICreateReservationResult extends IReservation {
+	payment: {
+		id: string;
+		amount: number;
+		status: PaymentStatus;
+		gatewayPageURL: string;
+	};
 }

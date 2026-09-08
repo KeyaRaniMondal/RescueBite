@@ -22,6 +22,11 @@ export * from "./enums";
  */
 export type FoodListing = Prisma.FoodListingModel;
 /**
+ * Model Payment
+ *
+ */
+export type Payment = Prisma.PaymentModel;
+/**
  * Model Provider
  *
  */

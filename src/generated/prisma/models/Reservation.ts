@@ -270,6 +270,10 @@ export type ReservationWhereInput = {
 		Prisma.CustomerScalarRelationFilter,
 		Prisma.CustomerWhereInput
 	>;
+	payment?: Prisma.XOR<
+		Prisma.PaymentNullableScalarRelationFilter,
+		Prisma.PaymentWhereInput
+	> | null;
 };
 
 export type ReservationOrderByWithRelationInput = {
@@ -284,6 +288,7 @@ export type ReservationOrderByWithRelationInput = {
 	updatedAt?: Prisma.SortOrder;
 	listing?: Prisma.FoodListingOrderByWithRelationInput;
 	customer?: Prisma.CustomerOrderByWithRelationInput;
+	payment?: Prisma.PaymentOrderByWithRelationInput;
 };
 
 export type ReservationWhereUniqueInput = Prisma.AtLeast<
@@ -318,6 +323,10 @@ export type ReservationWhereUniqueInput = Prisma.AtLeast<
 			Prisma.CustomerScalarRelationFilter,
 			Prisma.CustomerWhereInput
 		>;
+		payment?: Prisma.XOR<
+			Prisma.PaymentNullableScalarRelationFilter,
+			Prisma.PaymentWhereInput
+		> | null;
 	},
 	"id"
 >;
@@ -384,6 +393,7 @@ export type ReservationCreateInput = {
 	updatedAt?: Date | string;
 	listing: Prisma.FoodListingCreateNestedOneWithoutReservationsInput;
 	customer: Prisma.CustomerCreateNestedOneWithoutReservationsInput;
+	payment?: Prisma.PaymentCreateNestedOneWithoutReservationInput;
 };
 
 export type ReservationUncheckedCreateInput = {
@@ -396,6 +406,7 @@ export type ReservationUncheckedCreateInput = {
 	completedAt?: Date | string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
+	payment?: Prisma.PaymentUncheckedCreateNestedOneWithoutReservationInput;
 };
 
 export type ReservationUpdateInput = {
@@ -418,6 +429,7 @@ export type ReservationUpdateInput = {
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	listing?: Prisma.FoodListingUpdateOneRequiredWithoutReservationsNestedInput;
 	customer?: Prisma.CustomerUpdateOneRequiredWithoutReservationsNestedInput;
+	payment?: Prisma.PaymentUpdateOneWithoutReservationNestedInput;
 };
 
 export type ReservationUncheckedUpdateInput = {
@@ -440,6 +452,7 @@ export type ReservationUncheckedUpdateInput = {
 		| null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	payment?: Prisma.PaymentUncheckedUpdateOneWithoutReservationNestedInput;
 };
 
 export type ReservationCreateManyInput = {
@@ -504,6 +517,11 @@ export type ReservationListRelationFilter = {
 
 export type ReservationOrderByRelationAggregateInput = {
 	_count?: Prisma.SortOrder;
+};
+
+export type ReservationScalarRelationFilter = {
+	is?: Prisma.ReservationWhereInput;
+	isNot?: Prisma.ReservationWhereInput;
 };
 
 export type ReservationCountOrderByAggregateInput = {
@@ -660,6 +678,32 @@ export type ReservationUncheckedUpdateManyWithoutListingNestedInput = {
 		| Prisma.ReservationScalarWhereInput[];
 };
 
+export type ReservationCreateNestedOneWithoutPaymentInput = {
+	create?: Prisma.XOR<
+		Prisma.ReservationCreateWithoutPaymentInput,
+		Prisma.ReservationUncheckedCreateWithoutPaymentInput
+	>;
+	connectOrCreate?: Prisma.ReservationCreateOrConnectWithoutPaymentInput;
+	connect?: Prisma.ReservationWhereUniqueInput;
+};
+
+export type ReservationUpdateOneRequiredWithoutPaymentNestedInput = {
+	create?: Prisma.XOR<
+		Prisma.ReservationCreateWithoutPaymentInput,
+		Prisma.ReservationUncheckedCreateWithoutPaymentInput
+	>;
+	connectOrCreate?: Prisma.ReservationCreateOrConnectWithoutPaymentInput;
+	upsert?: Prisma.ReservationUpsertWithoutPaymentInput;
+	connect?: Prisma.ReservationWhereUniqueInput;
+	update?: Prisma.XOR<
+		Prisma.XOR<
+			Prisma.ReservationUpdateToOneWithWhereWithoutPaymentInput,
+			Prisma.ReservationUpdateWithoutPaymentInput
+		>,
+		Prisma.ReservationUncheckedUpdateWithoutPaymentInput
+	>;
+};
+
 export type EnumReservationStatusFieldUpdateOperationsInput = {
 	set?: $Enums.ReservationStatus;
 };
@@ -787,6 +831,7 @@ export type ReservationCreateWithoutListingInput = {
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	customer: Prisma.CustomerCreateNestedOneWithoutReservationsInput;
+	payment?: Prisma.PaymentCreateNestedOneWithoutReservationInput;
 };
 
 export type ReservationUncheckedCreateWithoutListingInput = {
@@ -798,6 +843,7 @@ export type ReservationUncheckedCreateWithoutListingInput = {
 	completedAt?: Date | string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
+	payment?: Prisma.PaymentUncheckedCreateNestedOneWithoutReservationInput;
 };
 
 export type ReservationCreateOrConnectWithoutListingInput = {
@@ -872,6 +918,102 @@ export type ReservationScalarWhereInput = {
 	updatedAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string;
 };
 
+export type ReservationCreateWithoutPaymentInput = {
+	id?: string;
+	quantity: number;
+	status?: $Enums.ReservationStatus;
+	cancelledAt?: Date | string | null;
+	completedAt?: Date | string | null;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
+	listing: Prisma.FoodListingCreateNestedOneWithoutReservationsInput;
+	customer: Prisma.CustomerCreateNestedOneWithoutReservationsInput;
+};
+
+export type ReservationUncheckedCreateWithoutPaymentInput = {
+	id?: string;
+	listingId: string;
+	customerId: string;
+	quantity: number;
+	status?: $Enums.ReservationStatus;
+	cancelledAt?: Date | string | null;
+	completedAt?: Date | string | null;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
+};
+
+export type ReservationCreateOrConnectWithoutPaymentInput = {
+	where: Prisma.ReservationWhereUniqueInput;
+	create: Prisma.XOR<
+		Prisma.ReservationCreateWithoutPaymentInput,
+		Prisma.ReservationUncheckedCreateWithoutPaymentInput
+	>;
+};
+
+export type ReservationUpsertWithoutPaymentInput = {
+	update: Prisma.XOR<
+		Prisma.ReservationUpdateWithoutPaymentInput,
+		Prisma.ReservationUncheckedUpdateWithoutPaymentInput
+	>;
+	create: Prisma.XOR<
+		Prisma.ReservationCreateWithoutPaymentInput,
+		Prisma.ReservationUncheckedCreateWithoutPaymentInput
+	>;
+	where?: Prisma.ReservationWhereInput;
+};
+
+export type ReservationUpdateToOneWithWhereWithoutPaymentInput = {
+	where?: Prisma.ReservationWhereInput;
+	data: Prisma.XOR<
+		Prisma.ReservationUpdateWithoutPaymentInput,
+		Prisma.ReservationUncheckedUpdateWithoutPaymentInput
+	>;
+};
+
+export type ReservationUpdateWithoutPaymentInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	quantity?: Prisma.IntFieldUpdateOperationsInput | number;
+	status?:
+		| Prisma.EnumReservationStatusFieldUpdateOperationsInput
+		| $Enums.ReservationStatus;
+	cancelledAt?:
+		| Prisma.NullableDateTimeFieldUpdateOperationsInput
+		| Date
+		| string
+		| null;
+	completedAt?:
+		| Prisma.NullableDateTimeFieldUpdateOperationsInput
+		| Date
+		| string
+		| null;
+	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	listing?: Prisma.FoodListingUpdateOneRequiredWithoutReservationsNestedInput;
+	customer?: Prisma.CustomerUpdateOneRequiredWithoutReservationsNestedInput;
+};
+
+export type ReservationUncheckedUpdateWithoutPaymentInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	listingId?: Prisma.StringFieldUpdateOperationsInput | string;
+	customerId?: Prisma.StringFieldUpdateOperationsInput | string;
+	quantity?: Prisma.IntFieldUpdateOperationsInput | number;
+	status?:
+		| Prisma.EnumReservationStatusFieldUpdateOperationsInput
+		| $Enums.ReservationStatus;
+	cancelledAt?:
+		| Prisma.NullableDateTimeFieldUpdateOperationsInput
+		| Date
+		| string
+		| null;
+	completedAt?:
+		| Prisma.NullableDateTimeFieldUpdateOperationsInput
+		| Date
+		| string
+		| null;
+	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+};
+
 export type ReservationCreateWithoutCustomerInput = {
 	id?: string;
 	quantity: number;
@@ -881,6 +1023,7 @@ export type ReservationCreateWithoutCustomerInput = {
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	listing: Prisma.FoodListingCreateNestedOneWithoutReservationsInput;
+	payment?: Prisma.PaymentCreateNestedOneWithoutReservationInput;
 };
 
 export type ReservationUncheckedCreateWithoutCustomerInput = {
@@ -892,6 +1035,7 @@ export type ReservationUncheckedCreateWithoutCustomerInput = {
 	completedAt?: Date | string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
+	payment?: Prisma.PaymentUncheckedCreateNestedOneWithoutReservationInput;
 };
 
 export type ReservationCreateOrConnectWithoutCustomerInput = {
@@ -967,6 +1111,7 @@ export type ReservationUpdateWithoutListingInput = {
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	customer?: Prisma.CustomerUpdateOneRequiredWithoutReservationsNestedInput;
+	payment?: Prisma.PaymentUpdateOneWithoutReservationNestedInput;
 };
 
 export type ReservationUncheckedUpdateWithoutListingInput = {
@@ -988,6 +1133,7 @@ export type ReservationUncheckedUpdateWithoutListingInput = {
 		| null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	payment?: Prisma.PaymentUncheckedUpdateOneWithoutReservationNestedInput;
 };
 
 export type ReservationUncheckedUpdateManyWithoutListingInput = {
@@ -1041,6 +1187,7 @@ export type ReservationUpdateWithoutCustomerInput = {
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	listing?: Prisma.FoodListingUpdateOneRequiredWithoutReservationsNestedInput;
+	payment?: Prisma.PaymentUpdateOneWithoutReservationNestedInput;
 };
 
 export type ReservationUncheckedUpdateWithoutCustomerInput = {
@@ -1062,6 +1209,7 @@ export type ReservationUncheckedUpdateWithoutCustomerInput = {
 		| null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	payment?: Prisma.PaymentUncheckedUpdateOneWithoutReservationNestedInput;
 };
 
 export type ReservationUncheckedUpdateManyWithoutCustomerInput = {
@@ -1101,6 +1249,7 @@ export type ReservationSelect<
 		updatedAt?: boolean;
 		listing?: boolean | Prisma.FoodListingDefaultArgs<ExtArgs>;
 		customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>;
+		payment?: boolean | Prisma.Reservation$paymentArgs<ExtArgs>;
 	},
 	ExtArgs["result"]["reservation"]
 >;
@@ -1178,6 +1327,7 @@ export type ReservationInclude<
 > = {
 	listing?: boolean | Prisma.FoodListingDefaultArgs<ExtArgs>;
 	customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>;
+	payment?: boolean | Prisma.Reservation$paymentArgs<ExtArgs>;
 };
 export type ReservationIncludeCreateManyAndReturn<
 	ExtArgs extends
@@ -1202,6 +1352,7 @@ export type $ReservationPayload<
 	objects: {
 		listing: Prisma.$FoodListingPayload<ExtArgs>;
 		customer: Prisma.$CustomerPayload<ExtArgs>;
+		payment: Prisma.$PaymentPayload<ExtArgs> | null;
 	};
 	scalars: runtime.Types.Extensions.GetPayloadResult<
 		{
@@ -1795,6 +1946,19 @@ export interface Prisma__ReservationClient<
 		ExtArgs,
 		GlobalOmitOptions
 	>;
+	payment<T extends Prisma.Reservation$paymentArgs<ExtArgs> = {}>(
+		args?: Prisma.Subset<T, Prisma.Reservation$paymentArgs<ExtArgs>>,
+	): Prisma.Prisma__PaymentClient<
+		runtime.Types.Result.GetResult<
+			Prisma.$PaymentPayload<ExtArgs>,
+			T,
+			"findUniqueOrThrow",
+			GlobalOmitOptions
+		> | null,
+		null,
+		ExtArgs,
+		GlobalOmitOptions
+	>;
 	/**
 	 * Attaches callbacks for the resolution and/or rejection of the Promise.
 	 * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2315,6 +2479,28 @@ export type ReservationDeleteManyArgs<
 	 * Limit how many Reservations to delete.
 	 */
 	limit?: number;
+};
+
+/**
+ * Reservation.payment
+ */
+export type Reservation$paymentArgs<
+	ExtArgs extends
+		runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs,
+> = {
+	/**
+	 * Select specific fields to fetch from the Payment
+	 */
+	select?: Prisma.PaymentSelect<ExtArgs> | null;
+	/**
+	 * Omit specific fields from the Payment
+	 */
+	omit?: Prisma.PaymentOmit<ExtArgs> | null;
+	/**
+	 * Choose, which related nodes to fetch as well
+	 */
+	include?: Prisma.PaymentInclude<ExtArgs> | null;
+	where?: Prisma.PaymentWhereInput;
 };
 
 /**

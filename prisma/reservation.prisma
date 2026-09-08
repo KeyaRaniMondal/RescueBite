@@ -6,6 +6,7 @@ model Reservation {
     customer    Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
     quantity    Int
     status      ReservationStatus @default(RESERVED)
+    payment     Payment?
 
     cancelledAt DateTime?
     completedAt DateTime?

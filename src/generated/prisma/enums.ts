@@ -77,3 +77,12 @@ export const ReservationStatus = {
 
 export type ReservationStatus =
 	(typeof ReservationStatus)[keyof typeof ReservationStatus];
+
+export const PaymentStatus = {
+	PENDING: "PENDING",
+	SUCCESS: "SUCCESS",
+	FAILED: "FAILED",
+	CANCELLED: "CANCELLED",
+} as const;
+
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus];

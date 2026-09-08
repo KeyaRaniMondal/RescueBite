@@ -3,11 +3,14 @@ import {
 	Prisma,
 	ReservationStatus,
 	FoodStatus,
+	PaymentStatus,
 } from "../../generated/prisma/client";
 import type {
 	ICreateReservationPayload,
+	ICreateReservationResult,
 	IReservation,
 } from "./reservation.interface";
+import { PaymentService } from "../payment/payment.service";
 import { AppError } from "../../utils/AppError";
 import httpStatus from "http-status";
 
@@ -25,6 +28,22 @@ const getCustomerForUser = async (userId: string): Promise<string> => {
 	}
 
 	return customer.id;
+};
+
+const getCustomerRecordForUser = async (userId: string) => {
+	const customer = await prisma.customer.findUnique({
+		where: { userId },
+		select: { id: true, name: true, email: true, contactNumber: true },
+	});
+
+	if (!customer) {
+		throw new AppError(
+			httpStatus.NOT_FOUND,
+			"Customer profile not found. Please register as a receiver first",
+		);
+	}
+
+	return customer;
 };
 
 const RESERVATION_SELECT = {
@@ -132,8 +151,8 @@ const deallocateListing = async (
 const reserveFood = async (
 	userId: string,
 	payload: ICreateReservationPayload,
-): Promise<IReservation> => {
-	const customerId = await getCustomerForUser(userId);
+): Promise<ICreateReservationResult> => {
+	const customer = await getCustomerRecordForUser(userId);
 
 	const reservation = await prisma.$transaction(async (tx) => {
 		const listing = await tx.foodListing.findUnique({
@@ -143,6 +162,9 @@ const reserveFood = async (
 				quantity: true,
 				status: true,
 				expiryTime: true,
+				price: true,
+				foodName: true,
+				category: true,
 			},
 		});
 
@@ -188,7 +210,7 @@ const reserveFood = async (
 		const created = await tx.reservation.create({
 			data: {
 				listingId: payload.listingId,
-				customerId,
+				customerId: customer.id,
 				quantity: payload.quantity,
 				status: ReservationStatus.RESERVED,
 			},
@@ -208,10 +230,49 @@ const reserveFood = async (
 			});
 		}
 
-		return created;
+		const payment = await PaymentService.createPendingPayment(tx, {
+			reservationId: created.id,
+			amount: listing.price * payload.quantity,
+			customer: {
+				name: customer.name,
+				email: customer.email,
+				phone: customer.contactNumber ?? "",
+			},
+			product: {
+				name: listing.foodName,
+				category: listing.category,
+				quantity: payload.quantity,
+			},
+		});
+
+		return { reservation: created, payment };
 	});
 
-	return toReservation(reservation);
+	const gatewayPageURL = await PaymentService.initiateSslCommerzPayment(
+		reservation.payment,
+		{
+			customer: {
+				name: customer.name,
+				email: customer.email,
+				phone: customer.contactNumber ?? "",
+			},
+			product: {
+				name: reservation.reservation.listing.foodName,
+				category: reservation.reservation.listing.category,
+				quantity: payload.quantity,
+			},
+		},
+	);
+
+	return {
+		...toReservation(reservation.reservation),
+		payment: {
+			id: reservation.payment.id,
+			amount: reservation.payment.amount,
+			status: reservation.payment.status,
+			gatewayPageURL,
+		},
+	};
 };
 
 const cancelReservation = async (
