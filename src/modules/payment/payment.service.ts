@@ -170,6 +170,30 @@ const validateSslCommerzTransaction = async (
 	return result;
 };
 
+const verifySslCommerzValidation = (
+	validation: Partial<ISslCommerzValidationResponse>,
+	payment: PaymentRow,
+): string | null => {
+	if (validation.tran_id && validation.tran_id !== payment.tranId) {
+		return `Transaction mismatch: expected tran_id ${payment.tranId}, received ${validation.tran_id}`;
+	}
+
+	if (validation.amount) {
+		const validatedAmount = Number(validation.amount);
+
+		if (
+			Number.isNaN(validatedAmount) ||
+			Math.abs(validatedAmount - payment.amount) > 0.01
+		) {
+			return `Amount mismatch: expected ${payment.amount.toFixed(
+				2,
+			)}, received ${validation.amount}`;
+		}
+	}
+
+	return null;
+};
+
 const getPaymentByTranId = async (
 	tx: Prisma.TransactionClient,
 	tranId: string,
@@ -236,9 +260,10 @@ const settlePayment = async (
 			};
 		}
 
-		await tx.payment.update({
+		const updatedPayment = await tx.payment.update({
 			where: { id: existing.id },
 			data: { status: outcome, gatewayData },
+			select: PAYMENT_SELECT,
 		});
 
 		await tx.reservation.update({
@@ -253,10 +278,7 @@ const settlePayment = async (
 		await deallocateListing(tx, existing.reservation.listingId);
 
 		return {
-			payment: toPayment({
-				...existing,
-				status: outcome,
-			}),
+			payment: toPayment(updatedPayment),
 			reservationStatus: ReservationStatus.CANCELLED,
 		};
 	});
@@ -280,7 +302,29 @@ const handleSuccessCallback = async (
 		);
 	}
 
+	const expected = await prisma.payment.findUnique({
+		where: { tranId },
+		select: PAYMENT_SELECT,
+	});
+
+	if (!expected) {
+		throw new AppError(
+			httpStatus.NOT_FOUND,
+			`Payment not found for tran_id ${tranId}`,
+		);
+	}
+
 	const validation = await validateSslCommerzTransaction(payload.val_id);
+
+	const invalidReason = verifySslCommerzValidation(validation, expected);
+
+	if (invalidReason) {
+		return settlePayment(tranId, PaymentStatus.FAILED, {
+			...payload,
+			validation,
+			reason: invalidReason,
+		});
+	}
 
 	if (validation.status !== "VALID" && validation.status !== "VALIDATED") {
 		const reason = validation.error ?? validation.status;
@@ -337,7 +381,29 @@ const handleIpnCallback = async (
 		});
 	}
 
+	const expected = await prisma.payment.findUnique({
+		where: { tranId },
+		select: PAYMENT_SELECT,
+	});
+
+	if (!expected) {
+		throw new AppError(
+			httpStatus.NOT_FOUND,
+			`Payment not found for tran_id ${tranId}`,
+		);
+	}
+
 	const validation = await validateSslCommerzTransaction(payload.val_id);
+
+	const invalidReason = verifySslCommerzValidation(validation, expected);
+
+	if (invalidReason) {
+		return settlePayment(tranId, PaymentStatus.FAILED, {
+			...payload,
+			validation,
+			reason: invalidReason,
+		});
+	}
 
 	if (validation.status === "VALID" || validation.status === "VALIDATED") {
 		return settlePayment(tranId, PaymentStatus.SUCCESS, {
