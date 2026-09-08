@@ -1,0 +1,15 @@
+model Payment {
+    id            String        @id @default(uuid())
+    reservationId String        @unique
+    reservation   Reservation   @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+    amount        Float
+    status        PaymentStatus @default(PENDING)
+    tranId        String        @unique
+    gatewayData   Json?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([status])
+    @@map("payments")
+}

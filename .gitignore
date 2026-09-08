@@ -8,3 +8,5 @@ migrations
 /generated/prisma
 procs.ps1
 server-out.log
+*.log
+get-otp-helper.mts

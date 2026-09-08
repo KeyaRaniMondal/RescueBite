@@ -1,0 +1,26 @@
+model FoodListing {
+    id              String      @id @default(uuid())
+    providerId      String
+    provider        Provider    @relation(fields: [providerId], references: [id], onDelete: Cascade)
+    foodName        String
+    description     String
+    category        FoodCategory
+    quantity        Int
+    unit            String
+    price           Float
+    pickupLocation  String
+    pickupStartTime DateTime
+    pickupEndTime   DateTime
+    expiryTime      DateTime
+    images          String[]
+    status          FoodStatus  @default(DRAFT)
+
+    reservations    Reservation[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([providerId])
+    @@index([status])
+    @@map("food_listings")
+}

@@ -25,3 +25,37 @@ enum BusinessType {
     GROCERY
     OTHER
 }
+
+enum FoodCategory {
+    BAKERY
+    GROCERY
+    PRODUCE
+    DAIRY
+    MEAT
+    PREPARED_MEAL
+    BEVERAGE
+    OTHER
+}
+
+enum FoodStatus {
+    DRAFT
+    AVAILABLE
+    PARTIALLY_RESERVED
+    FULLY_RESERVED
+    EXPIRED
+    CANCELLED
+}
+
+enum ReservationStatus {
+    RESERVED
+    CANCELLED
+    COMPLETED
+    EXPIRED
+}
+
+enum PaymentStatus {
+    PENDING
+    SUCCESS
+    FAILED
+    CANCELLED
+}

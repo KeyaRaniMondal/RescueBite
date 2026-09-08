@@ -9,6 +9,8 @@ model Provider {
     phone        String
     isVerified   Boolean      @default(false)
 
+    foodListings FoodListing[]
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
