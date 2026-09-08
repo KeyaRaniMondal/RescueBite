@@ -1,4 +1,4 @@
-import { PaymentStatus } from "../../generated/prisma/enums";
+import { PaymentStatus, ReservationStatus } from "../../generated/prisma/enums";
 
 export interface ICreatePaymentPayload {
 	reservationId: string;
@@ -55,4 +55,36 @@ export interface ISslCommerzInitResponse {
 	redirectGatewayURLFailed: string;
 	GatewayPageURLFailed: string;
 	storePayOption: string;
+}
+
+export interface ISslCommerzValidationResponse {
+	status: string;
+	tran_id: string;
+	val_id: string;
+	amount: string;
+	store_amount: string;
+	currency: string;
+	bank_tran_id: string;
+	card_type: string;
+	card_no: string;
+	store_id: string;
+	verify_sign: string;
+	verify_key: string;
+	error: string;
+}
+
+export interface IPaymentCallbackPayload {
+	tran_id?: string;
+	val_id?: string;
+	amount?: string;
+	currency?: string;
+	bank_tran_id?: string;
+	status?: string;
+	card_type?: string;
+	[key: string]: string | undefined;
+}
+
+export interface IPaymentCallbackResult {
+	payment: IPayment;
+	reservationStatus: ReservationStatus;
 }

@@ -1,12 +1,21 @@
-import { Prisma, PaymentStatus } from "../../generated/prisma/client";
+import {
+	Prisma,
+	PaymentStatus,
+	ReservationStatus,
+} from "../../generated/prisma/client";
+import { prisma } from "../../lib/prisma";
 import config from "../../config";
 import { AppError } from "../../utils/AppError";
 import httpStatus from "http-status";
+import { deallocateListing } from "../foodListing/foodListing.deallocation";
 import {
 	ICreatePaymentPayload,
 	IInitiatedPayment,
 	IPayment,
+	IPaymentCallbackPayload,
+	IPaymentCallbackResult,
 	ISslCommerzInitResponse,
+	ISslCommerzValidationResponse,
 } from "./payment.interface";
 
 const PAYMENT_SELECT = {
@@ -124,8 +133,233 @@ const initiatePayment = async (
 	};
 };
 
+const PAYMENT_CALLBACK_SELECT = {
+	...PAYMENT_SELECT,
+	reservation: {
+		select: {
+			id: true,
+			listingId: true,
+			status: true,
+		},
+	},
+} as const;
+
+type PaymentCallbackRow = PaymentRow & {
+	reservation: {
+		id: string;
+		listingId: string;
+		status: ReservationStatus;
+	};
+};
+
+const validateSslCommerzTransaction = async (
+	valId: string,
+): Promise<Partial<ISslCommerzValidationResponse>> => {
+	const params = new URLSearchParams();
+	params.set("val_id", valId);
+	params.set("store_id", config.ssl_commerz_store_id);
+	params.set("store_passwd", config.ssl_commerz_store_password);
+	params.set("format", "json");
+
+	const response = await fetch(
+		`${config.sslcommerz_validation_url}?${params.toString()}`,
+	);
+	const result =
+		(await response.json()) as Partial<ISslCommerzValidationResponse>;
+
+	return result;
+};
+
+const getPaymentByTranId = async (
+	tx: Prisma.TransactionClient,
+	tranId: string,
+): Promise<PaymentCallbackRow> => {
+	const payment = await tx.payment.findUnique({
+		where: { tranId },
+		select: PAYMENT_CALLBACK_SELECT,
+	});
+
+	if (!payment) {
+		throw new AppError(
+			httpStatus.NOT_FOUND,
+			`Payment not found for tran_id ${tranId}`,
+		);
+	}
+
+	return payment;
+};
+
+const settlePayment = async (
+	tranId: string,
+	outcome: PaymentStatus,
+	gatewayData: Prisma.InputJsonValue,
+): Promise<IPaymentCallbackResult> => {
+	if (outcome !== PaymentStatus.SUCCESS) {
+		if (
+			outcome !== PaymentStatus.FAILED &&
+			outcome !== PaymentStatus.CANCELLED
+		) {
+			throw new AppError(
+				httpStatus.BAD_REQUEST,
+				"Invalid payment settlement outcome",
+			);
+		}
+	}
+
+	const result = await prisma.$transaction(async (tx) => {
+		const existing = await getPaymentByTranId(tx, tranId);
+
+		if (existing.status === PaymentStatus.SUCCESS) {
+			return {
+				payment: toPayment(existing),
+				reservationStatus: existing.reservation.status,
+			};
+		}
+
+		if (existing.status !== PaymentStatus.PENDING) {
+			throw new AppError(
+				httpStatus.CONFLICT,
+				`Payment already settled as ${existing.status}`,
+			);
+		}
+
+		if (outcome === PaymentStatus.SUCCESS) {
+			const updated = await tx.payment.update({
+				where: { id: existing.id },
+				data: { status: PaymentStatus.SUCCESS, gatewayData },
+				select: PAYMENT_SELECT,
+			});
+
+			return {
+				payment: toPayment(updated),
+				reservationStatus: existing.reservation.status,
+			};
+		}
+
+		await tx.payment.update({
+			where: { id: existing.id },
+			data: { status: outcome, gatewayData },
+		});
+
+		await tx.reservation.update({
+			where: { id: existing.reservation.id },
+			data: {
+				status: ReservationStatus.CANCELLED,
+				cancelledAt: new Date(),
+			},
+		});
+
+		// release the reserved stock back to the listing
+		await deallocateListing(tx, existing.reservation.listingId);
+
+		return {
+			payment: toPayment({
+				...existing,
+				status: outcome,
+			}),
+			reservationStatus: ReservationStatus.CANCELLED,
+		};
+	});
+
+	return result;
+};
+
+const handleSuccessCallback = async (
+	payload: IPaymentCallbackPayload,
+): Promise<IPaymentCallbackResult> => {
+	const tranId = payload.tran_id;
+
+	if (!tranId) {
+		throw new AppError(httpStatus.BAD_REQUEST, "tran_id is required");
+	}
+
+	if (!payload.val_id) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"val_id is required to confirm the payment",
+		);
+	}
+
+	const validation = await validateSslCommerzTransaction(payload.val_id);
+
+	if (validation.status !== "VALID" && validation.status !== "VALIDATED") {
+		const reason = validation.error ?? validation.status;
+		return settlePayment(tranId, PaymentStatus.FAILED, {
+			...payload,
+			validation,
+			reason,
+		});
+	}
+
+	return settlePayment(tranId, PaymentStatus.SUCCESS, {
+		...payload,
+		validation,
+	});
+};
+
+const handleFailCallback = async (
+	payload: IPaymentCallbackPayload,
+): Promise<IPaymentCallbackResult> => {
+	const tranId = payload.tran_id;
+
+	if (!tranId) {
+		throw new AppError(httpStatus.BAD_REQUEST, "tran_id is required");
+	}
+
+	return settlePayment(tranId, PaymentStatus.FAILED, { ...payload });
+};
+
+const handleCancelCallback = async (
+	payload: IPaymentCallbackPayload,
+): Promise<IPaymentCallbackResult> => {
+	const tranId = payload.tran_id;
+
+	if (!tranId) {
+		throw new AppError(httpStatus.BAD_REQUEST, "tran_id is required");
+	}
+
+	return settlePayment(tranId, PaymentStatus.CANCELLED, { ...payload });
+};
+
+const handleIpnCallback = async (
+	payload: IPaymentCallbackPayload,
+): Promise<IPaymentCallbackResult> => {
+	const tranId = payload.tran_id;
+
+	if (!tranId) {
+		throw new AppError(httpStatus.BAD_REQUEST, "tran_id is required");
+	}
+
+	if (!payload.val_id) {
+		return settlePayment(tranId, PaymentStatus.FAILED, {
+			...payload,
+			reason: "val_id missing on IPN callback",
+		});
+	}
+
+	const validation = await validateSslCommerzTransaction(payload.val_id);
+
+	if (validation.status === "VALID" || validation.status === "VALIDATED") {
+		return settlePayment(tranId, PaymentStatus.SUCCESS, {
+			...payload,
+			validation,
+		});
+	}
+
+	const reason = validation.error ?? validation.status;
+	return settlePayment(tranId, PaymentStatus.FAILED, {
+		...payload,
+		validation,
+		reason,
+	});
+};
+
 export const PaymentService = {
 	createPendingPayment,
 	initiateSslCommerzPayment,
 	initiatePayment,
+	handleSuccessCallback,
+	handleFailCallback,
+	handleCancelCallback,
+	handleIpnCallback,
 };

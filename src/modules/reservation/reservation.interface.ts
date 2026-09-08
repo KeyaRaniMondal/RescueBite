@@ -26,6 +26,7 @@ export interface IReservation {
 export interface ICreateReservationResult extends IReservation {
 	payment: {
 		id: string;
+		tranId: string;
 		amount: number;
 		status: PaymentStatus;
 		gatewayPageURL: string;

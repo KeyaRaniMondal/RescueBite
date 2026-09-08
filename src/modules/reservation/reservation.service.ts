@@ -110,43 +110,7 @@ const toReservation = (reservation: ReservationRow): IReservation => {
 	};
 };
 
-const deallocateListing = async (
-	tx: Prisma.TransactionClient,
-	listingId: string,
-): Promise<void> => {
-	const reservationSum = await tx.reservation.aggregate({
-		where: {
-			listingId,
-			status: ReservationStatus.RESERVED,
-		},
-		_sum: { quantity: true },
-	});
-
-	const listing = await tx.foodListing.findUnique({
-		where: { id: listingId },
-		select: { quantity: true, status: true },
-	});
-
-	if (!listing) {
-		return;
-	}
-
-	const currentlyReserved = reservationSum._sum.quantity ?? 0;
-
-	const nextStatus =
-		currentlyReserved >= listing.quantity
-			? FoodStatus.FULLY_RESERVED
-			: currentlyReserved > 0
-				? FoodStatus.PARTIALLY_RESERVED
-				: FoodStatus.AVAILABLE;
-
-	if (listing.status !== nextStatus) {
-		await tx.foodListing.update({
-			where: { id: listingId },
-			data: { status: nextStatus },
-		});
-	}
-};
+import { deallocateListing } from "../foodListing/foodListing.deallocation";
 
 const reserveFood = async (
 	userId: string,
@@ -268,6 +232,7 @@ const reserveFood = async (
 		...toReservation(reservation.reservation),
 		payment: {
 			id: reservation.payment.id,
+			tranId: reservation.payment.tranId,
 			amount: reservation.payment.amount,
 			status: reservation.payment.status,
 			gatewayPageURL,
