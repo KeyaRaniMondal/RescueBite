@@ -5,12 +5,13 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { AdminUserService } from "./admin.user.service";
 import { AdminUserValidation } from "./admin.user.validation";
-import type { IAdminUserListQuery, IUpdateUserRolePayload } from "./admin.user.interface";
+import type {
+	IAdminUserListQuery,
+	IUpdateUserRolePayload,
+} from "./admin.user.interface";
 
 const getUsers = catchAsync(async (req: Request, res: Response) => {
-	const parsed = AdminUserValidation.UserListQuerySchema.safeParse(
-		req.query,
-	);
+	const parsed = AdminUserValidation.UserListQuerySchema.safeParse(req.query);
 
 	if (!parsed.success) {
 		throw new AppError(

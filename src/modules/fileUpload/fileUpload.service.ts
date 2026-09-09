@@ -1,7 +1,4 @@
-import {
-	cloudinaryUtils,
-	ICloudinaryUploadResult,
-} from "../../lib/cloudinary";
+import { cloudinaryUtils, ICloudinaryUploadResult } from "../../lib/cloudinary";
 import { AppError } from "../../utils/AppError";
 import httpStatus from "http-status";
 
@@ -26,7 +23,10 @@ const uploadImage = async (
 					? String((error as { message: unknown }).message)
 					: "Unknown error";
 
-		throw new AppError(httpStatus.BAD_GATEWAY, `Cloudinary upload failed: ${message}`);
+		throw new AppError(
+			httpStatus.BAD_GATEWAY,
+			`Cloudinary upload failed: ${message}`,
+		);
 	}
 };
 

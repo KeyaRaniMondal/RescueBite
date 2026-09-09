@@ -33,8 +33,7 @@ const uploadMultiple = catchAsync(async (req: Request, res: Response) => {
 		return sendResponse(res, {
 			statusCode: httpStatus.BAD_REQUEST,
 			success: false,
-			message:
-				"No files were uploaded. Expected files under field 'files'",
+			message: "No files were uploaded. Expected files under field 'files'",
 			data: null,
 		});
 	}
