@@ -34,7 +34,12 @@ const uploadBuffer = (
 						error instanceof Error
 							? error
 							: new Error(
-									JSON.stringify(error ?? { http_code: 522, message: "Cloudinary upload failed" }),
+									JSON.stringify(
+										error ?? {
+											http_code: 522,
+											message: "Cloudinary upload failed",
+										},
+									),
 								),
 					);
 					return;

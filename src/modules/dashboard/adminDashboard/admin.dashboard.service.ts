@@ -1,10 +1,10 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../../lib/prisma";
 import {
 	Role,
 	FoodStatus,
 	ReservationStatus,
-} from "../../generated/prisma/client";
-import type { IDashboardStats } from "../dashboard/adminDashboard/admin.dashboard.interface";
+} from "../../../generated/prisma/client";
+import type { IDashboardStats } from "./admin.dashboard.interface";
 
 const getDashboardStats = async (): Promise<IDashboardStats> => {
 	const [

@@ -17,6 +17,7 @@ import { ReservationRoutes } from "./modules/reservation/reservation.route";
 import { AdminRoutes } from "./modules/dashboard/adminDashboard/admin.dashboard.route";
 import { PaymentRoutes } from "./modules/payment/payment.route";
 import { FileUploadRoutes } from "./modules/fileUpload/fileUpload.route";
+import { UserProfileRoutes } from "./modules/user/user.route";
 
 const app: Application = express();
 
@@ -42,6 +43,7 @@ app.use("/api/v1/reservations", ReservationRoutes);
 app.use("/api/v1/admin", AdminRoutes);
 app.use("/api/v1/payments", PaymentRoutes);
 app.use("/api/v1/upload", FileUploadRoutes);
+app.use("/api/v1/users", UserProfileRoutes);
 
 app.post("/zod", async (req: Request, res: Response, next: NextFunction) => {
 	try {
