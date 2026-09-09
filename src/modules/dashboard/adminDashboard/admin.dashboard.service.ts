@@ -4,7 +4,7 @@ import {
 	FoodStatus,
 	ReservationStatus,
 } from "../../generated/prisma/client";
-import type { IDashboardStats } from "./admin.dashboard.interface";
+import type { IDashboardStats } from "../dashboard/adminDashboard/admin.dashboard.interface";
 
 const getDashboardStats = async (): Promise<IDashboardStats> => {
 	const [
