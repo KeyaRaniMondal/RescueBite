@@ -5,9 +5,13 @@ import { sendResponse } from "../../utils/sendResponse";
 import { PaymentService } from "./payment.service";
 import type { IPaymentCallbackPayload } from "./payment.interface";
 
+const toCallbackPayload = (req: Request): IPaymentCallbackPayload => {
+	return { ...req.query, ...req.body } as IPaymentCallbackPayload;
+};
+
 const success = catchAsync(async (req: Request, res: Response) => {
 	const result = await PaymentService.handleSuccessCallback(
-		req.body as IPaymentCallbackPayload,
+		toCallbackPayload(req),
 	);
 
 	sendResponse(res, {
@@ -20,7 +24,7 @@ const success = catchAsync(async (req: Request, res: Response) => {
 
 const fail = catchAsync(async (req: Request, res: Response) => {
 	const result = await PaymentService.handleFailCallback(
-		req.body as IPaymentCallbackPayload,
+		toCallbackPayload(req),
 	);
 
 	sendResponse(res, {
@@ -33,7 +37,7 @@ const fail = catchAsync(async (req: Request, res: Response) => {
 
 const cancel = catchAsync(async (req: Request, res: Response) => {
 	const result = await PaymentService.handleCancelCallback(
-		req.body as IPaymentCallbackPayload,
+		toCallbackPayload(req),
 	);
 
 	sendResponse(res, {
@@ -46,7 +50,7 @@ const cancel = catchAsync(async (req: Request, res: Response) => {
 
 const ipn = catchAsync(async (req: Request, res: Response) => {
 	const result = await PaymentService.handleIpnCallback(
-		req.body as IPaymentCallbackPayload,
+		toCallbackPayload(req),
 	);
 
 	sendResponse(res, {

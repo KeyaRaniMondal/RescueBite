@@ -2,6 +2,11 @@ import { Router } from "express";
 import { authenticate, authorizeRoles } from "../../middlewares/auth";
 import { Role } from "../../generated/prisma/enums";
 import { FoodListingController } from "./foodListing.controller";
+import {
+	bindMultipleUploadToBody,
+	wrapMulter,
+	handleUploadMultiple,
+} from "../../middlewares/upload";
 
 const router = Router();
 
@@ -9,6 +14,8 @@ router.post(
 	"/",
 	authenticate,
 	authorizeRoles(Role.PROVIDER),
+	wrapMulter(handleUploadMultiple),
+	bindMultipleUploadToBody(),
 	FoodListingController.createFoodListing,
 );
 
@@ -34,6 +41,8 @@ router.patch(
 	"/:id",
 	authenticate,
 	authorizeRoles(Role.PROVIDER),
+	wrapMulter(handleUploadMultiple),
+	bindMultipleUploadToBody(),
 	FoodListingController.updateFoodListing,
 );
 

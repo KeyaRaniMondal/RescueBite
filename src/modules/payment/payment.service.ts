@@ -296,10 +296,31 @@ const handleSuccessCallback = async (
 	}
 
 	if (!payload.val_id) {
-		throw new AppError(
-			httpStatus.BAD_REQUEST,
-			"val_id is required to confirm the payment",
+		// Some gateways (e.g. mobile-banking OTP via bankgw/indexhtmlOTP.php)
+		// redirect to the success_url before val_id is available. The real
+		// confirmation arrives through the IPN. Do not mark the payment as
+		// SUCCESS without a validatable val_id - just acknowledge the
+		// redirect and let the IPN/validation pass settle it.
+		const current = await prisma.$transaction((tx) =>
+			getPaymentByTranId(tx, tranId),
 		);
+
+		if (current.status === PaymentStatus.SUCCESS) {
+			return {
+				payment: toPayment(current),
+				reservationStatus: current.reservation.status,
+			};
+		}
+
+		console.warn(
+			`[payments:success] val_id missing for tran_id ${tranId}; ` +
+				`current status ${current.status}, awaiting IPN confirmation`,
+		);
+
+		return {
+			payment: toPayment(current),
+			reservationStatus: current.reservation.status,
+		};
 	}
 
 	const expected = await prisma.payment.findUnique({
