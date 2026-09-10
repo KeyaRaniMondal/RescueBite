@@ -3,24 +3,12 @@ import { authenticate } from "../../middlewares/auth";
 import {
 	handleUploadSingle,
 	handleUploadMultiple,
-	mapMulterError,
+	wrapMulter,
 } from "../../middlewares/upload";
 import type { NextFunction, Request, RequestHandler, Response } from "express";
 import { FileUploadController } from "./fileUpload.controller";
 
 const router = Router();
-
-const wrapMulter =
-	(handler: RequestHandler): RequestHandler =>
-	(req: Request, res: Response, next: NextFunction) => {
-		handler(req, res, (error?: unknown) => {
-			if (error) {
-				next(mapMulterError(error));
-				return;
-			}
-			next();
-		});
-	};
 
 const wrapController =
 	(handler: RequestHandler): RequestHandler =>

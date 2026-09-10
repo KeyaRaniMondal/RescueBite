@@ -17,12 +17,12 @@ const CreateFoodListingZodSchema = z
 		category: z.enum(foodCategoryValues, {
 			error: "A valid food category is required",
 		}),
-		quantity: z
+		quantity: z.coerce
 			.number("Quantity must be a number")
 			.int("Quantity must be a whole number")
 			.positive("Quantity must be greater than zero"),
 		unit: z.string("Unit must be a string").min(1, "Unit is required"),
-		price: z
+		price: z.coerce
 			.number("Price must be a number")
 			.nonnegative("Price cannot be negative"),
 		pickupLocation: z
@@ -74,7 +74,7 @@ const UpdateFoodListingZodSchema = z
 				error: "A valid food category is required",
 			})
 			.optional(),
-		quantity: z
+		quantity: z.coerce
 			.number("Quantity must be a number")
 			.int("Quantity must be a whole number")
 			.positive("Quantity must be greater than zero")
@@ -83,7 +83,7 @@ const UpdateFoodListingZodSchema = z
 			.string("Unit must be a string")
 			.min(1, "Unit is required")
 			.optional(),
-		price: z
+		price: z.coerce
 			.number("Price must be a number")
 			.nonnegative("Price cannot be negative")
 			.optional(),

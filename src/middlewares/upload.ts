@@ -1,6 +1,8 @@
 import multer from "multer";
 import { AppError } from "../utils/AppError";
 import httpStatus from "http-status";
+import type { NextFunction, Request, RequestHandler, Response } from "express";
+import { FileUploadService } from "../modules/fileUpload/fileUpload.service";
 
 const ALLOWED_MIME_TYPES = [
 	"image/jpeg",
@@ -52,4 +54,57 @@ export const mapMulterError = (error: unknown): Error => {
 	}
 
 	return error instanceof Error ? error : new Error("File upload failed");
+};
+
+export const wrapMulter =
+	(handler: RequestHandler): RequestHandler =>
+	(req: Request, res: Response, next: NextFunction) => {
+		handler(req, res, (error?: unknown) => {
+			if (error) {
+				next(mapMulterError(error));
+				return;
+			}
+			next();
+		});
+	};
+
+export const bindSingleUploadToBody = (): RequestHandler => {
+	return (req: Request, res: Response, next: NextFunction) => {
+		if (!req.file) {
+			next();
+			return;
+		}
+
+		FileUploadService.uploadImage(req.file)
+			.then((result) => {
+				req.body = {
+					...req.body,
+					imageUrl: result.secureUrl,
+					imagePublicId: result.publicId,
+				};
+				next();
+			})
+			.catch(next);
+	};
+};
+
+export const bindMultipleUploadToBody = (): RequestHandler => {
+	return (req: Request, res: Response, next: NextFunction) => {
+		const files = req.files as Express.Multer.File[] | undefined;
+
+		if (!files?.length) {
+			next();
+			return;
+		}
+
+		FileUploadService.uploadImages(files)
+			.then((results) => {
+				req.body = {
+					...req.body,
+					images: results.map((result) => result.secureUrl),
+				};
+				next();
+			})
+			.catch(next);
+	};
 };
