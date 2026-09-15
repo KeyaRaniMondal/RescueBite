@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+/.alchemy
+/.prisma-composer
+.next
+migrations
+/generated/prisma
+procs.ps1
+server-out.log
+*.log
+get-otp-helper.mts
+.vercel
