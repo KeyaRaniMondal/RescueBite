@@ -35,3 +35,7 @@ export interface IResetpassword {
 	newPassword: string;
 	otp: string;
 }
+
+export interface IGoogleLoginPayload {
+	idToken: string;
+}

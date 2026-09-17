@@ -49,9 +49,7 @@ const cancel = catchAsync(async (req: Request, res: Response) => {
 });
 
 const ipn = catchAsync(async (req: Request, res: Response) => {
-	const result = await PaymentService.handleIpnCallback(
-		toCallbackPayload(req),
-	);
+	const result = await PaymentService.handleIpnCallback(toCallbackPayload(req));
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,

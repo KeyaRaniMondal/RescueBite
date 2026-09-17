@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../../lib/prisma";
 import {
 	IForgotPassword,
+	IGoogleLoginPayload,
 	ILoginUserPayload,
 	IRegisterCustomerPayload,
 	IRequestUser,
@@ -15,10 +16,14 @@ import { redisClient } from "../../lib/redis";
 import path from "node:path";
 import ejs from "ejs";
 import config from "../../config";
-import { Role, UserStatus } from "../../generated/prisma/enums";
+import { AuthProvider, Role, UserStatus } from "../../generated/prisma/enums";
 import { jwtUtils } from "../../utils/jwt";
 import { JwtPayload, SignOptions } from "jsonwebtoken";
 import { transporter } from "../../lib/nodemailer";
+import httpStatus from "http-status";
+import { TokenPayload } from "google-auth-library";
+import { googleClient } from "../../lib/googleAuth";
+import { AppError } from "../../utils/AppError";
 
 const registerCustomer = async (payload: IRegisterCustomerPayload) => {
 	const { name, password, role, customer: customerData } = payload;
@@ -371,6 +376,161 @@ const resetPassword = async (payload: IResetpassword) => {
 		text: `password got changeed into new one`,
 	});
 };
+
+const googleLogin = async (payload: IGoogleLoginPayload) => {
+	let googleIdTokenPayload: TokenPayload | null | undefined = null;
+	try {
+		const ticket = await googleClient.verifyIdToken({
+			idToken: payload.idToken,
+			audience: config.google_client_id,
+		});
+
+		googleIdTokenPayload = ticket.getPayload();
+	} catch (error) {
+		console.log("Google ID Token Verification Failed", error);
+		throw new AppError(
+			httpStatus.UNAUTHORIZED,
+			"Invalid Or Expired Google Id Token",
+		);
+	}
+
+	if (!googleIdTokenPayload) {
+		throw new AppError(
+			httpStatus.UNAUTHORIZED,
+			"Invalid Or Expired Google Id Token",
+		);
+	}
+
+	if (!googleIdTokenPayload.email) {
+		throw new AppError(httpStatus.BAD_REQUEST, "Google Email Not Found");
+	}
+	if (!googleIdTokenPayload.name) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"Google Email User Name Not Found",
+		);
+	}
+
+	const ifCustomerExistWithGoogleAuth = await prisma.user.findUnique({
+		where: {
+			email: googleIdTokenPayload.email,
+			role: Role.RECEIVER,
+			googleId: googleIdTokenPayload.sub,
+		},
+	});
+
+	let user = ifCustomerExistWithGoogleAuth;
+
+	if (!ifCustomerExistWithGoogleAuth) {
+		const ifCustomerExistWithCredentials = await prisma.user.findUnique({
+			where: {
+				email: googleIdTokenPayload.email,
+				role: Role.RECEIVER,
+				authProvider: AuthProvider.CREDENTIAL,
+			},
+		});
+
+		if (ifCustomerExistWithCredentials) {
+			if (!ifCustomerExistWithCredentials.emailVerified) {
+				throw new AppError(httpStatus.FORBIDDEN, "Email Not Verified");
+			}
+
+			if (ifCustomerExistWithCredentials.status === UserStatus.BLOCKED) {
+				throw new AppError(httpStatus.FORBIDDEN, "User Is Blocked");
+			}
+
+			if (
+				ifCustomerExistWithCredentials.isDeleted ||
+				ifCustomerExistWithCredentials.status === UserStatus.DELETED
+			) {
+				throw new AppError(httpStatus.FORBIDDEN, "User Is Deleted");
+			}
+
+			user = await prisma.user.update({
+				where: {
+					id: ifCustomerExistWithCredentials.id,
+				},
+
+				data: {
+					googleId: googleIdTokenPayload.sub,
+				},
+			});
+		} else {
+			// Google Register
+			user = await prisma.user.create({
+				data: {
+					name: googleIdTokenPayload.name,
+					email: googleIdTokenPayload.email,
+					role: Role.RECEIVER,
+					googleId: googleIdTokenPayload.sub,
+					authProvider: AuthProvider.GOOGLE,
+					emailVerified: true,
+					Customer: {
+						create: {
+							name: googleIdTokenPayload.name,
+							email: googleIdTokenPayload.email,
+						},
+					},
+				},
+			});
+			const tempatePath = path.join(
+				process.cwd(),
+				"src/app/templates/Customer-welcome-email.ejs",
+			);
+
+			const templateData = {
+				name: user.name,
+			};
+
+			const html = await ejs.renderFile(tempatePath, templateData);
+
+			await transporter.sendMail({
+				from: config.email_sender,
+				to: user.email,
+				subject: "Welcome To PH Healthcare System",
+				// text : `Your OTP is ${otp}`
+				// html: `<h1>Your OTP is ${otp}</h1>`
+				html,
+			});
+		}
+	}
+
+	if (!user) {
+		throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
+	}
+
+	if (user.status === UserStatus.BLOCKED) {
+		throw new AppError(httpStatus.FORBIDDEN, "User Is Blocked");
+	}
+
+	if (user.isDeleted || user.status === UserStatus.DELETED) {
+		throw new AppError(httpStatus.FORBIDDEN, "User Is Deleted");
+	}
+
+	const jwtPayload = {
+		userId: user.id,
+		name: user.name,
+		email: user.email,
+		role: user.role,
+	};
+
+	const accessToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_access_secret,
+		config.jwt_access_expires_in as SignOptions,
+	);
+
+	const refreshToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_refresh_secret,
+		config.jwt_refresh_expires_in as SignOptions,
+	);
+
+	return {
+		accessToken,
+		refreshToken,
+	};
+};
 export const AuthService = {
 	registerCustomer,
 	verifyCustomerEmail,
@@ -378,4 +538,5 @@ export const AuthService = {
 	refreshToken,
 	forgotPassword,
 	resetPassword,
+	googleLogin,
 };

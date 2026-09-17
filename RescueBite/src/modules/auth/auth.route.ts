@@ -20,6 +20,9 @@ router.post(
 	validateRequest(UserValidation.LoginZodSchema),
 	AuthController.loginUser,
 );
+
+router.post("/google", AuthController.googleLogin);
+
 router.post(
 	"/forgot-password",
 	validateRequest(UserValidation.ForgotPasswordZodSchema),
