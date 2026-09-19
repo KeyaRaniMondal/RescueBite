@@ -13,6 +13,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, type ReactNode, useState } from "react";
+import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { api, getErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -219,6 +221,14 @@ export function SignupForm() {
           </CardHeader>
           <form onSubmit={handleRegister} noValidate>
             <CardContent className="grid gap-4">
+              <GoogleAuthButton mode="signup" />
+
+              <div className="flex items-center gap-3">
+                <Separator className="flex-1" />
+                <span className="text-xs text-muted-foreground">or</span>
+                <Separator className="flex-1" />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <AccountTypeButton
                   active={values.role === "RECEIVER"}

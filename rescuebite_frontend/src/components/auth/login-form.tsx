@@ -4,6 +4,7 @@ import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, type ReactNode, useState } from "react";
+import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { api, getErrorMessage } from "@/lib/api";
 
 type LoginValues = {
@@ -124,6 +126,14 @@ export function LoginForm() {
       </CardHeader>
       <form onSubmit={handleSubmit} noValidate>
         <CardContent className="grid gap-4">
+          <GoogleAuthButton mode="login" />
+
+          <div className="flex items-center gap-3">
+            <Separator className="flex-1" />
+            <span className="text-xs text-muted-foreground">or</span>
+            <Separator className="flex-1" />
+          </div>
+
           <Field
             label="Email"
             icon={<Mail className="size-4" />}
