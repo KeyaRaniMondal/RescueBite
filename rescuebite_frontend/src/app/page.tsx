@@ -1,5 +1,5 @@
+import Hero from "@/components/home/hero";
 import type { Metadata } from "next";
-import { Hero } from "@/components/home/hero";
 
 export const metadata: Metadata = {
   title: "RescueBite — No Good Food Left Behind",

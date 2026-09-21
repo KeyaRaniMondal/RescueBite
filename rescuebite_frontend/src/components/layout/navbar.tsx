@@ -4,117 +4,116 @@ import { Menu, UtensilsCrossed, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/browse", label: "Browse Food" },
-  { href: "/about", label: "About" },
+  { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
+  { href: "/browse", label: "Key Features" },
+  { href: "/about", label: "Service" },
+  { href: "/contact", label: "Testimonial" },
 ];
 
 export function Navbar() {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <UtensilsCrossed className="size-5" />
-          </div>
-          <span className="text-lg font-bold tracking-tight text-foreground">
-            Rescue<span className="text-primary">Bite</span>
-          </span>
+    <header className="absolute inset-x-0 top-0 z-20 px-6 pt-5 lg:px-10">
+      <div className="mx-auto flex max-w-7xl items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-wide text-amber-400">
+          <UtensilsCrossed aria-hidden className="size-5" />
+          RescueBite
         </Link>
 
-        {/* Desktop Links */}
-        <ul className="hidden items-center gap-1 md:flex">
+        <nav
+          className="hidden items-center gap-8 text-sm font-medium text-white/90 lg:flex"
+          aria-label="Main navigation"
+        >
           {navLinks.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground",
-                  pathname === link.href
-                    ? "bg-muted text-foreground"
-                    : "text-muted-foreground",
-                )}
-              >
-                {link.label}
-              </Link>
-            </li>
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "transition-colors hover:text-amber-400",
+                pathname === link.href && "text-amber-400",
+              )}
+            >
+              {link.label}
+            </Link>
           ))}
-        </ul>
+        </nav>
 
-        {/* Desktop Auth Buttons */}
-        <div className="hidden items-center gap-2 md:flex">
-          <Button variant="ghost" size="sm" render={<Link href="/login" />}>
+        {/* Desktop auth buttons */}
+        <div className="hidden items-center gap-3 lg:flex">
+          <button className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#0f3d2e] transition-transform hover:scale-105">
+          <span aria-hidden>🛒</span>
+          Cart
+        </button>
+          <Link
+            href="/login"
+            className="rounded-full border border-white/20 px-3.5 py-2 text-xs font-semibold tracking-widest text-white uppercase transition-colors hover:bg-white/10"
+          >
             Sign In
-          </Button>
-          <Button size="sm" render={<Link href="/register" />}>
+          </Link>
+          <Link
+            href="/register"
+            className="rounded-full bg-amber-400 px-3.5 py-2 text-xs font-semibold tracking-widest text-[#0f3d2e] uppercase shadow-lg shadow-amber-400/20 transition-transform hover:scale-105"
+          >
             Sign Up
-          </Button>
+          </Link>
         </div>
 
-        {/* Mobile Menu Button */}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+        {/* Mobile menu toggle */}
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+          onClick={() => setIsOpen((open) => !open)}
+          className="rounded-full p-2 text-white transition-colors hover:bg-white/10 lg:hidden"
         >
-          {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-        </Button>
-      </nav>
+          {isOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+        </button>
+      </div>
 
-      {/* Mobile Menu */}
-      {mobileOpen && (
-        <div className="border-t border-border bg-background px-4 pb-4 pt-2 md:hidden">
-          <ul className="flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    "block rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground",
-                    pathname === link.href
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-3 flex flex-col gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              render={
-                <Link href="/login" onClick={() => setMobileOpen(false)} />
-              }
+      {isOpen && (
+        <nav
+          className="mx-auto mt-4 max-w-7xl rounded-2xl border border-white/10 bg-[#0f3d2e]/95 p-3 shadow-xl backdrop-blur lg:hidden"
+          aria-label="Mobile navigation"
+        >
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setIsOpen(false)}
+              className={cn(
+                "block rounded-xl px-4 py-3 text-sm font-medium text-white/90 hover:bg-white/10",
+                pathname === link.href && "text-amber-400",
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+
+          <div className="mt-2 flex gap-2 border-t border-white/10 pt-3">
+            <Link
+              href="/login"
+              onClick={() => setIsOpen(false)}
+              className="flex-1 rounded-xl border border-white/20 px-4 py-2.5 text-center text-xs font-semibold tracking-widest text-white uppercase hover:bg-white/10"
             >
               Sign In
-            </Button>
-            <Button
-              size="sm"
-              className="w-full"
-              render={
-                <Link href="/register" onClick={() => setMobileOpen(false)} />
-              }
+            </Link>
+            <Link
+              href="/register"
+              onClick={() => setIsOpen(false)}
+              className="flex-1 rounded-xl bg-amber-400 px-4 py-2.5 text-center text-xs font-semibold tracking-widest text-[#0f3d2e] uppercase hover:scale-[1.02]"
             >
               Sign Up
-            </Button>
+            </Link>
           </div>
-        </div>
+        </nav>
       )}
     </header>
   );

@@ -26,7 +26,6 @@ export function GoogleAuthButton({ mode }: GoogleAuthButtonProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
