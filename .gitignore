@@ -11,3 +11,5 @@ server-out.log
 *.log
 get-otp-helper.mts
 .vercel
+
+.tmp-prisma.ts

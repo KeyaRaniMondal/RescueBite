@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { api, getErrorMessage } from "@/lib/api";
+import { getPostAuthPath } from "@/lib/auth";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
@@ -57,7 +58,7 @@ export function GoogleAuthButton({ mode }: GoogleAuthButtonProps) {
         "rescuebite_refresh_token",
         response.data.refreshToken,
       );
-      router.push("/");
+      router.push(getPostAuthPath(response.data.accessToken));
     } catch (err) {
       setError(
         getErrorMessage(

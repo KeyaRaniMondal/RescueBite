@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { api, getErrorMessage } from "@/lib/api";
+import { getPostAuthPath } from "@/lib/auth";
 
 type LoginValues = {
   email: string;
@@ -105,7 +106,7 @@ export function LoginForm() {
         "rescuebite_refresh_token",
         response.data.refreshToken,
       );
-      router.push("/");
+      router.push(getPostAuthPath(response.data.accessToken));
     } catch (error) {
       setSubmitError(
         getErrorMessage(

@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { api, getErrorMessage } from "@/lib/api";
+import { getPostAuthPath } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 type Role = "RECEIVER" | "PROVIDER" | "ADMIN";
@@ -199,7 +200,7 @@ export function SignupForm() {
         "rescuebite_refresh_token",
         response.data.refreshToken,
       );
-      router.push("/");
+      router.push(getPostAuthPath(response.data.accessToken));
     } catch (error) {
       setSubmitError(
         getErrorMessage(error, "Verification failed. Please check your OTP."),
