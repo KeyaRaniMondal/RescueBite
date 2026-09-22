@@ -221,8 +221,12 @@ export function ProviderProfileView() {
                 </ul>
               </CardContent>
               <CardFooter className="flex-col items-stretch gap-2">
-                <Button size="lg" className="w-full" render={<Link href="/" />}>
-                  Go to homepage
+                <Button
+                  size="lg"
+                  className="w-full"
+                  render={<Link href="/provider/dashboard" />}
+                >
+                  Go to dashboard
                   <ArrowRight />
                 </Button>
                 <Button

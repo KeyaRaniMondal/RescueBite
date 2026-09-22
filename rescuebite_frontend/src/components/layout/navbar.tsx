@@ -1,27 +1,78 @@
 "use client";
 
-import { Menu, UtensilsCrossed, X } from "lucide-react";
+import {
+  ChevronDown,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  ShoppingBasket,
+  Store,
+  UtensilsCrossed,
+  X,
+} from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { clearTokens, getAccessToken } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
-const navLinks = [
+const MARKETING_LINKS = [
   { href: "/", label: "Home" },
   { href: "/browse", label: "Browse Food" },
-  { href: "/about", label: "About Us" },
+  { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
-  { href: "/browse", label: "Key Features" },
-  { href: "/about", label: "Service" },
-  { href: "/contact", label: "Testimonial" },
 ];
 
-export function Navbar() {
+const APP_LINKS = [
+  { href: "/provider/dashboard", label: "Dashboard" },
+  { href: "/browse", label: "Browse Food" },
+];
+
+type NavbarProps = {
+  /** "marketing" = public site, full link set. "app" = signed-in shell, app-only links. */
+  variant?: "marketing" | "app";
+  userName?: string;
+};
+
+export function Navbar({ variant = "marketing", userName }: NavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const navLinks = variant === "app" ? APP_LINKS : MARKETING_LINKS;
+
+  useEffect(() => {
+    setIsAuthed(Boolean(getAccessToken()));
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  function handleSignOut() {
+    clearTokens();
+    setMenuOpen(false);
+    router.push("/login");
+  }
+
+  const initials = (userName || "Account")
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
-    <header className="absolute inset-x-0 top-0 z-20 px-6 pt-5 lg:px-10">
+    <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0f3d2e] px-6 py-4 lg:px-10">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-wide text-amber-400">
           <UtensilsCrossed aria-hidden className="size-5" />
@@ -46,33 +97,90 @@ export function Navbar() {
           ))}
         </nav>
 
-        {/* Desktop auth buttons */}
         <div className="hidden items-center gap-3 lg:flex">
-          <button className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#0f3d2e] transition-transform hover:scale-105">
-          <span aria-hidden>🛒</span>
-          Cart
-        </button>
-          <Link
-            href="/login"
-            className="rounded-full border border-white/20 px-3.5 py-2 text-xs font-semibold tracking-widest text-white uppercase transition-colors hover:bg-white/10"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/register"
-            className="rounded-full bg-amber-400 px-3.5 py-2 text-xs font-semibold tracking-widest text-[#0f3d2e] uppercase shadow-lg shadow-amber-400/20 transition-transform hover:scale-105"
-          >
-            Sign Up
-          </Link>
+          {variant === "marketing" && (
+            <Link
+              href="/browse"
+              className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#0f3d2e] transition-colors hover:bg-white/90"
+            >
+              <ShoppingBasket aria-hidden className="size-4" />
+              Cart
+            </Link>
+          )}
+
+          {isAuthed ? (
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                onClick={() => setMenuOpen((open) => !open)}
+                aria-expanded={menuOpen}
+                aria-haspopup="menu"
+                className="flex items-center gap-2 rounded-md border border-white/15 py-1.5 pl-1.5 pr-3 text-sm font-medium text-white transition-colors hover:bg-white/10"
+              >
+                <span className="flex size-7 items-center justify-center rounded-sm bg-amber-400 text-xs font-bold text-[#0f3d2e]">
+                  {initials}
+                </span>
+                {userName || "Account"}
+                <ChevronDown aria-hidden className="size-4 text-white/60" />
+              </button>
+
+              {menuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 mt-2 w-56 rounded-md border border-border bg-white p-1 text-sm text-foreground shadow-lg"
+                >
+                  <Link
+                    href="/provider/dashboard"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-sm px-3 py-2 hover:bg-muted"
+                  >
+                    <LayoutDashboard className="size-4 text-muted-foreground" />
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/provider/profile"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-sm px-3 py-2 hover:bg-muted"
+                  >
+                    <Store className="size-4 text-muted-foreground" />
+                    Business profile
+                  </Link>
+                  <div className="my-1 h-px bg-border" />
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-destructive hover:bg-destructive/10"
+                  >
+                    <LogOut className="size-4" />
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="rounded-md border border-white/20 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/register"
+                className="rounded-md bg-amber-400 px-3.5 py-2 text-sm font-semibold text-[#0f3d2e] transition-colors hover:bg-amber-300"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
 
-        {/* Mobile menu toggle */}
         <button
           type="button"
           aria-expanded={isOpen}
           aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
           onClick={() => setIsOpen((open) => !open)}
-          className="rounded-full p-2 text-white transition-colors hover:bg-white/10 lg:hidden"
+          className="rounded-md p-2 text-white transition-colors hover:bg-white/10 lg:hidden"
         >
           {isOpen ? <X className="size-6" /> : <Menu className="size-6" />}
         </button>
@@ -80,7 +188,7 @@ export function Navbar() {
 
       {isOpen && (
         <nav
-          className="mx-auto mt-4 max-w-7xl rounded-2xl border border-white/10 bg-[#0f3d2e]/95 p-3 shadow-xl backdrop-blur lg:hidden"
+          className="mx-auto mt-4 max-w-7xl rounded-md border border-white/10 bg-[#0f3d2e] p-3 lg:hidden"
           aria-label="Mobile navigation"
         >
           {navLinks.map((link) => (
@@ -89,7 +197,7 @@ export function Navbar() {
               href={link.href}
               onClick={() => setIsOpen(false)}
               className={cn(
-                "block rounded-xl px-4 py-3 text-sm font-medium text-white/90 hover:bg-white/10",
+                "block rounded-sm px-4 py-3 text-sm font-medium text-white/90 hover:bg-white/10",
                 pathname === link.href && "text-amber-400",
               )}
             >
@@ -97,21 +205,34 @@ export function Navbar() {
             </Link>
           ))}
 
-          <div className="mt-2 flex gap-2 border-t border-white/10 pt-3">
-            <Link
-              href="/login"
-              onClick={() => setIsOpen(false)}
-              className="flex-1 rounded-xl border border-white/20 px-4 py-2.5 text-center text-xs font-semibold tracking-widest text-white uppercase hover:bg-white/10"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/register"
-              onClick={() => setIsOpen(false)}
-              className="flex-1 rounded-xl bg-amber-400 px-4 py-2.5 text-center text-xs font-semibold tracking-widest text-[#0f3d2e] uppercase hover:scale-[1.02]"
-            >
-              Sign Up
-            </Link>
+          <div className="mt-2 border-t border-white/10 pt-3">
+            {isAuthed ? (
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="flex w-full items-center gap-2 rounded-sm px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+              >
+                <LogOut className="size-4" />
+                Sign out
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <Link
+                  href="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="flex-1 rounded-sm border border-white/20 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-white/10"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setIsOpen(false)}
+                  className="flex-1 rounded-sm bg-amber-400 px-4 py-2.5 text-center text-sm font-semibold text-[#0f3d2e]"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
         </nav>
       )}
