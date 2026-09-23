@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 type Photo = {
   src: string;
@@ -68,12 +69,18 @@ export default function Hero() {
         </h1>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <button className="rounded-full bg-amber-400 px-7 py-3.5 text-sm font-semibold text-[#0f3d2e] shadow-lg shadow-amber-400/20 transition-transform hover:scale-105">
+          <Link
+            href="/browse"
+            className="rounded-full bg-amber-400 px-7 py-3.5 text-sm font-semibold text-[#0f3d2e] shadow-lg shadow-amber-400/20 transition-transform hover:scale-105"
+          >
             Shop Now
-          </button>
-          <button className="rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[#0f3d2e] transition-transform hover:scale-105">
+          </Link>
+          <Link
+            href="/browse"
+            className="rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[#0f3d2e] transition-transform hover:scale-105"
+          >
             Explore Menu
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -84,12 +91,24 @@ export default function Hero() {
             key={photo.src}
             className={`relative hidden h-56 w-40 flex-shrink-0 overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10 sm:block sm:h-64 sm:w-44 md:h-72 md:w-48 ${photo.rotate} ${photo.lift}`}
           >
-            <Image src={photo.src} alt={photo.alt} fill sizes="200px" className="object-cover" />
+            <Image
+              src={photo.src}
+              alt={photo.alt}
+              fill
+              sizes="200px"
+              className="object-cover"
+            />
           </div>
         ))}
         {/* mobile fallback: just show one photo, centered */}
         <div className="relative h-64 w-48 overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10 sm:hidden">
-          <Image src={photos[0].src} alt={photos[0].alt} fill sizes="200px" className="object-cover" />
+          <Image
+            src={photos[0].src}
+            alt={photos[0].alt}
+            fill
+            sizes="200px"
+            className="object-cover"
+          />
         </div>
       </div>
     </section>

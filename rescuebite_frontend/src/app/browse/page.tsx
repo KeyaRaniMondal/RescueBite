@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PagePlaceholder } from "@/components/page-placeholder";
+import { BrowseView } from "@/components/browse/browse-view";
 
 export const metadata: Metadata = {
   title: "Browse Food | RescueBite",
@@ -8,10 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function BrowsePage() {
-  return (
-    <PagePlaceholder
-      title="Surplus food, near you"
-      description="The RescueBite marketplace is coming soon. Soon you'll be able to browse fresh surplus meals, snacks, and groceries from local providers — free to pick up, close to home."
-    />
-  );
+  return <BrowseView />;
 }
