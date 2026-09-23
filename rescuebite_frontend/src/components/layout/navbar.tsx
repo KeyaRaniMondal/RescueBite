@@ -7,13 +7,14 @@ import {
   Menu,
   ShoppingBasket,
   Store,
+  User as UserIcon,
   UtensilsCrossed,
   X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { clearTokens, getAccessToken } from "@/lib/auth";
+import { type AuthUser, clearTokens, getStoredUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 const MARKETING_LINKS = [
@@ -39,14 +40,15 @@ export function Navbar({ variant = "marketing", userName }: NavbarProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isAuthed, setIsAuthed] = useState(false);
+  const [storedUser, setStoredUser] = useState<AuthUser | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const navLinks = variant === "app" ? APP_LINKS : MARKETING_LINKS;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pathname re-syncs navbar after login/logout redirects.
   useEffect(() => {
-    setIsAuthed(Boolean(getAccessToken()));
-  }, []);
+    setStoredUser(getStoredUser());
+  }, [pathname]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -60,21 +62,34 @@ export function Navbar({ variant = "marketing", userName }: NavbarProps) {
 
   function handleSignOut() {
     clearTokens();
+    setStoredUser(null);
     setMenuOpen(false);
+    setIsOpen(false);
     router.push("/login");
   }
 
-  const initials = (userName || "Account")
+  const displayName = userName || storedUser?.name || "Account";
+  const initials = displayName
     .split(" ")
     .map((part) => part[0])
     .slice(0, 2)
     .join("")
     .toUpperCase();
+  const isAuthed = storedUser !== null;
+  const dashboardHref =
+    storedUser?.role === "PROVIDER"
+      ? "/provider/dashboard"
+      : storedUser?.role === "RECEIVER"
+        ? "/receiver/dashboard"
+        : "/";
 
   return (
     <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0f3d2e] px-6 py-4 lg:px-10">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-wide text-amber-400">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-lg font-bold tracking-wide text-amber-400"
+        >
           <UtensilsCrossed aria-hidden className="size-5" />
           RescueBite
         </Link>
@@ -120,7 +135,7 @@ export function Navbar({ variant = "marketing", userName }: NavbarProps) {
                 <span className="flex size-7 items-center justify-center rounded-sm bg-amber-400 text-xs font-bold text-[#0f3d2e]">
                   {initials}
                 </span>
-                {userName || "Account"}
+                {displayName}
                 <ChevronDown aria-hidden className="size-4 text-white/60" />
               </button>
 
@@ -130,21 +145,32 @@ export function Navbar({ variant = "marketing", userName }: NavbarProps) {
                   className="absolute right-0 mt-2 w-56 rounded-md border border-border bg-white p-1 text-sm text-foreground shadow-lg"
                 >
                   <Link
-                    href="/provider/dashboard"
+                    href={dashboardHref}
                     onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-2 rounded-sm px-3 py-2 hover:bg-muted"
                   >
                     <LayoutDashboard className="size-4 text-muted-foreground" />
                     Dashboard
                   </Link>
-                  <Link
-                    href="/provider/profile"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 rounded-sm px-3 py-2 hover:bg-muted"
-                  >
-                    <Store className="size-4 text-muted-foreground" />
-                    Business profile
-                  </Link>
+                  {storedUser?.role === "PROVIDER" ? (
+                    <Link
+                      href="/provider/profile"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-sm px-3 py-2 hover:bg-muted"
+                    >
+                      <Store className="size-4 text-muted-foreground" />
+                      Business profile
+                    </Link>
+                  ) : (
+                    <Link
+                      href={dashboardHref}
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-sm px-3 py-2 hover:bg-muted"
+                    >
+                      <UserIcon className="size-4 text-muted-foreground" />
+                      My profile
+                    </Link>
+                  )}
                   <div className="my-1 h-px bg-border" />
                   <button
                     type="button"
@@ -207,14 +233,24 @@ export function Navbar({ variant = "marketing", userName }: NavbarProps) {
 
           <div className="mt-2 border-t border-white/10 pt-3">
             {isAuthed ? (
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="flex w-full items-center gap-2 rounded-sm px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
-              >
-                <LogOut className="size-4" />
-                Sign out
-              </button>
+              <div className="grid gap-2">
+                <Link
+                  href={dashboardHref}
+                  onClick={() => setIsOpen(false)}
+                  className="flex w-full items-center gap-2 rounded-sm px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+                >
+                  <LayoutDashboard className="size-4" />
+                  Dashboard
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="flex w-full items-center gap-2 rounded-sm px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+                >
+                  <LogOut className="size-4" />
+                  Sign out
+                </button>
+              </div>
             ) : (
               <div className="flex gap-2">
                 <Link

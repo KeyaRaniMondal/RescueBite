@@ -82,10 +82,12 @@ export function getStoredUser(): AuthUser | null {
  * Where to send a user right after signing in, based on the role in their
  * freshly issued access token. Providers land on their dashboard — the
  * dashboard itself forwards to `/provider/profile` when no business profile
- * exists yet; everyone else goes to the homepage.
+ * exists yet. Receivers land on their dashboard, which hosts their editable
+ * profile. Everyone else goes to the homepage.
  */
 export function getPostAuthPath(accessToken: string): string {
-  return decodeAccessToken(accessToken)?.role === "PROVIDER"
-    ? "/provider/dashboard"
-    : "/";
+  const role = decodeAccessToken(accessToken)?.role;
+  if (role === "PROVIDER") return "/provider/dashboard";
+  if (role === "RECEIVER") return "/receiver/dashboard";
+  return "/";
 }
