@@ -1,6 +1,16 @@
 "use client";
 
-import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  Mail,
+  ShieldCheck,
+  Store,
+  User,
+  Zap,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, type ReactNode, useState } from "react";
@@ -39,6 +49,53 @@ const initialValues: LoginValues = {
   password: "",
 };
 
+type DemoRole = "ADMIN" | "PROVIDER" | "RECEIVER";
+
+type DemoAccount = {
+  role: DemoRole;
+  label: string;
+  email: string;
+  password: string;
+  icon: typeof ShieldCheck;
+};
+
+const DEMO_ACCOUNTS: DemoAccount[] = [
+  {
+    role: "ADMIN",
+    label: "Admin",
+    email: process.env.NEXT_PUBLIC_DEMO_ADMIN_EMAIL ?? "demoadmin@gmail.com",
+    password: process.env.NEXT_PUBLIC_DEMO_ADMIN_PASSWORD ?? "de12Ad*m.",
+    icon: ShieldCheck,
+  },
+  {
+    role: "RECEIVER",
+    label: "User",
+    email: process.env.NEXT_PUBLIC_DEMO_USER_EMAIL ?? "custom@gmail.com",
+    password: process.env.NEXT_PUBLIC_DEMO_USER_PASSWORD ?? "*cust45P1P./",
+    icon: User,
+  },
+  {
+    role: "PROVIDER",
+    label: "Provider",
+    email:
+      process.env.NEXT_PUBLIC_DEMO_PROVIDER_EMAIL ?? "pro@gmail.com",
+    password:
+      process.env.NEXT_PUBLIC_DEMO_PROVIDER_PASSWORD ?? "*pro45P1P./",
+    icon: Store,
+  },
+];
+
+async function authenticate(email: string, password: string): Promise<string> {
+  const response = (await api("/auth/login", {
+    method: "POST",
+    body: { email: email.trim(), password },
+  })) as LoginResponse;
+
+  localStorage.setItem("rescuebite_access_token", response.data.accessToken);
+  localStorage.setItem("rescuebite_refresh_token", response.data.refreshToken);
+  return response.data.accessToken;
+}
+
 function validatePassword(value: string): string {
   if (!value) return "Password is required";
   if (value.length < 8) return "Password must be at least 8 characters long";
@@ -70,6 +127,7 @@ export function LoginForm() {
   const [values, setValues] = useState<LoginValues>(initialValues);
   const [errors, setErrors] = useState<LoginErrors>({});
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState<DemoRole | null>(null);
   const [submitError, setSubmitError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -90,23 +148,11 @@ export function LoginForm() {
     setSubmitError("");
     setLoading(true);
     try {
-      const response = (await api("/auth/login", {
-        method: "POST",
-        body: {
-          email: values.email.trim(),
-          password: values.password,
-        },
-      })) as LoginResponse;
-
-      localStorage.setItem(
-        "rescuebite_access_token",
-        response.data.accessToken,
+      const accessToken = await authenticate(
+        values.email.trim(),
+        values.password,
       );
-      localStorage.setItem(
-        "rescuebite_refresh_token",
-        response.data.refreshToken,
-      );
-      router.push(getPostAuthPath(response.data.accessToken));
+      router.push(getPostAuthPath(accessToken));
     } catch (error) {
       setSubmitError(
         getErrorMessage(
@@ -116,6 +162,24 @@ export function LoginForm() {
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDemoLogin(account: DemoAccount) {
+    setSubmitError("");
+    setDemoLoading(account.role);
+    try {
+      const accessToken = await authenticate(account.email, account.password);
+      router.push(getPostAuthPath(accessToken));
+    } catch (error) {
+      setSubmitError(
+        getErrorMessage(
+          error,
+          `Unable to sign in with the demo ${account.label.toLowerCase()} account. Please make sure it exists.`,
+        ),
+      );
+    } finally {
+      setDemoLoading(null);
     }
   }
 
@@ -196,10 +260,90 @@ export function LoginForm() {
           )}
         </CardContent>
         <CardFooter className="flex-col gap-3">
-          <Button type="submit" size="lg" className="w-full" disabled={loading}>
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full"
+            disabled={loading || demoLoading !== null}
+          >
             {loading && <Loader2 className="animate-spin" />}
             {loading ? "Signing in..." : "Sign in"}
           </Button>
+
+          <div className="flex w-full items-center gap-3 pt-1">
+            <Separator className="flex-1" />
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              OR
+            </span>
+            <Separator className="flex-1" />
+          </div>
+
+          <div className="grid w-full gap-2">
+            <p className="flex items-center justify-center gap-1.5 text-sm font-semibold">
+              <Zap className="size-4" />
+              Quick Demo Login
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {DEMO_ACCOUNTS.slice(0, 2).map((account) => {
+                const Icon = account.icon;
+                const isLoading = demoLoading === account.role;
+                return (
+                  <Button
+                    key={account.role}
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    className="h-auto flex-col gap-1 py-3"
+                    disabled={loading || demoLoading !== null}
+                    onClick={() => handleDemoLogin(account)}
+                    aria-label={`Demo login as ${account.label}`}
+                  >
+                    <span className="flex items-center gap-1.5 text-sm font-semibold">
+                      {isLoading ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Icon className="size-4" />
+                      )}
+                      {account.label}
+                    </span>
+                    <span className="text-[11px] font-normal text-muted-foreground">
+                      {isLoading ? "Signing in..." : "Demo Login"}
+                    </span>
+                  </Button>
+                );
+              })}
+            </div>
+            {DEMO_ACCOUNTS.slice(2).map((account) => {
+              const Icon = account.icon;
+              const isLoading = demoLoading === account.role;
+              return (
+                <div key={account.role} className="flex justify-center">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    className="h-auto w-[calc(50%-4px)] flex-col gap-1 py-3"
+                    disabled={loading || demoLoading !== null}
+                    onClick={() => handleDemoLogin(account)}
+                    aria-label={`Demo login as ${account.label}`}
+                  >
+                    <span className="flex items-center gap-1.5 text-sm font-semibold">
+                      {isLoading ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Icon className="size-4" />
+                      )}
+                      {account.label}
+                    </span>
+                    <span className="text-[11px] font-normal text-muted-foreground">
+                      {isLoading ? "Signing in..." : "Demo Login"}
+                    </span>
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+
           <p className="text-center text-xs text-muted-foreground">
             Don&apos;t have an account?{" "}
             <Link
