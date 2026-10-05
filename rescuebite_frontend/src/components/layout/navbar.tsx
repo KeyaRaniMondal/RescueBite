@@ -77,11 +77,13 @@ export function Navbar({ variant = "marketing", userName }: NavbarProps) {
     .toUpperCase();
   const isAuthed = storedUser !== null;
   const dashboardHref =
-    storedUser?.role === "PROVIDER"
-      ? "/provider/dashboard"
-      : storedUser?.role === "RECEIVER"
-        ? "/receiver/dashboard"
-        : "/";
+    storedUser?.role === "ADMIN"
+      ? "/admin/dashboard"
+      : storedUser?.role === "PROVIDER"
+        ? "/provider/dashboard"
+        : storedUser?.role === "RECEIVER"
+          ? "/receiver/dashboard"
+          : "/";
 
   return (
     <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0f3d2e] px-6 py-4 lg:px-10">
