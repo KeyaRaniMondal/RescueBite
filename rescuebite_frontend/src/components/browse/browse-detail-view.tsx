@@ -275,7 +275,7 @@ export function BrowseDetailView({ id }: { id: string }) {
                 className="w-full"
                 type="button"
                 onClick={() =>
-                  window.open(reserveSuccess.paymentUrl, "_blank", "noopener")
+                  window.location.assign(reserveSuccess.paymentUrl)
                 }
               >
                 Pay now
