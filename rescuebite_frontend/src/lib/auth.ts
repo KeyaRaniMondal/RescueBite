@@ -90,6 +90,6 @@ export function getPostAuthPath(accessToken: string): string {
   const role = decodeAccessToken(accessToken)?.role;
   if (role === "ADMIN") return "/admin/dashboard";
   if (role === "PROVIDER") return "/provider/dashboard";
-  if (role === "RECEIVER") return "/receiver/dashboard";
+  if (role === "RECEIVER") return "/dashboard";
   return "/";
 }

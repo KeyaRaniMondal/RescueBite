@@ -82,7 +82,7 @@ export function Navbar({ variant = "marketing", userName }: NavbarProps) {
       : storedUser?.role === "PROVIDER"
         ? "/provider/dashboard"
         : storedUser?.role === "RECEIVER"
-          ? "/receiver/dashboard"
+          ? "/dashboard"
           : "/";
 
   return (

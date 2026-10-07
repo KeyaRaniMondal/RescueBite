@@ -1,16 +1,17 @@
+import httpStatus from "http-status";
+import config from "../../config";
 import {
-	Prisma,
 	PaymentStatus,
+	type Prisma,
 	ReservationStatus,
 } from "../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
-import config from "../../config";
 import { AppError } from "../../utils/AppError";
-import httpStatus from "http-status";
 import { deallocateListing } from "../foodListing/foodListing.deallocation";
-import {
+import type {
 	ICreatePaymentPayload,
 	IInitiatedPayment,
+	IMyPayment,
 	IPayment,
 	IPaymentCallbackPayload,
 	IPaymentCallbackResult,
@@ -386,6 +387,58 @@ const handleCancelCallback = async (
 	return settlePayment(tranId, PaymentStatus.CANCELLED, { ...payload });
 };
 
+const getMyPayments = async (userId: string): Promise<IMyPayment[]> => {
+	const customer = await prisma.customer.findUnique({
+		where: { userId },
+		select: { id: true },
+	});
+
+	if (!customer) {
+		throw new AppError(
+			httpStatus.NOT_FOUND,
+			"Customer profile not found. Please register as a receiver first",
+		);
+	}
+
+	const payments = await prisma.payment.findMany({
+		where: { reservation: { customerId: customer.id } },
+		select: {
+			...PAYMENT_SELECT,
+			reservation: {
+				select: {
+					id: true,
+					quantity: true,
+					status: true,
+					listing: {
+						select: {
+							foodName: true,
+							pickupLocation: true,
+						},
+					},
+				},
+			},
+		},
+		orderBy: { createdAt: "desc" },
+	});
+
+	return payments.map((payment) => ({
+		id: payment.id,
+		reservationId: payment.reservationId,
+		amount: payment.amount,
+		status: payment.status,
+		tranId: payment.tranId,
+		createdAt: payment.createdAt.toISOString(),
+		updatedAt: payment.updatedAt.toISOString(),
+		reservation: {
+			id: payment.reservation.id,
+			quantity: payment.reservation.quantity,
+			status: payment.reservation.status,
+			foodName: payment.reservation.listing.foodName,
+			pickupLocation: payment.reservation.listing.pickupLocation,
+		},
+	}));
+};
+
 const handleIpnCallback = async (
 	payload: IPaymentCallbackPayload,
 ): Promise<IPaymentCallbackResult> => {
@@ -445,6 +498,7 @@ export const PaymentService = {
 	createPendingPayment,
 	initiateSslCommerzPayment,
 	initiatePayment,
+	getMyPayments,
 	handleSuccessCallback,
 	handleFailCallback,
 	handleCancelCallback,

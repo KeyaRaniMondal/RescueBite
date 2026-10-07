@@ -1,4 +1,7 @@
-import { PaymentStatus, ReservationStatus } from "../../generated/prisma/enums";
+import type {
+	PaymentStatus,
+	ReservationStatus,
+} from "../../generated/prisma/enums";
 
 export interface ICreatePaymentPayload {
 	reservationId: string;
@@ -87,4 +90,21 @@ export interface IPaymentCallbackPayload {
 export interface IPaymentCallbackResult {
 	payment: IPayment;
 	reservationStatus: ReservationStatus;
+}
+
+export interface IMyPayment {
+	id: string;
+	reservationId: string;
+	amount: number;
+	status: PaymentStatus;
+	tranId: string;
+	createdAt: string;
+	updatedAt: string;
+	reservation: {
+		id: string;
+		quantity: number;
+		status: ReservationStatus;
+		foodName: string;
+		pickupLocation: string;
+	};
 }

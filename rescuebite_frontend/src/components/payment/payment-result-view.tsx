@@ -107,7 +107,7 @@ export function PaymentResultView({
           <Button
             size="lg"
             className="w-full"
-            render={<Link href="/receiver/dashboard" />}
+            render={<Link href="/dashboard" />}
           >
             Go to my dashboard
           </Button>

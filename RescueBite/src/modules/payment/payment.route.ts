@@ -1,7 +1,16 @@
 import { Router } from "express";
+import { Role } from "../../generated/prisma/enums";
+import { authenticate, authorizeRoles } from "../../middlewares/auth";
 import { PaymentController } from "./payment.controller";
 
 const router = Router();
+
+router.get(
+	"/my",
+	authenticate,
+	authorizeRoles(Role.RECEIVER),
+	PaymentController.getMyPayments,
+);
 
 router
 	.route("/success")

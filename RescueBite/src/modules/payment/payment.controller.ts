@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import httpStatus from "http-status";
 import config from "../../config";
+import { AppError } from "../../utils/AppError";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import type {
@@ -77,6 +78,23 @@ const cancel = async (req: Request, res: Response): Promise<void> => {
 	}
 };
 
+const getMyPayments = catchAsync(async (req: Request, res: Response) => {
+	const userId = req.user?.userId;
+
+	if (!userId) {
+		throw new AppError(httpStatus.UNAUTHORIZED, "Authentication required");
+	}
+
+	const payments = await PaymentService.getMyPayments(userId);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Payments retrieved successfully",
+		data: payments,
+	});
+});
+
 const ipn = catchAsync(async (req: Request, res: Response) => {
 	const result = await PaymentService.handleIpnCallback(toCallbackPayload(req));
 
@@ -93,4 +111,5 @@ export const PaymentController = {
 	fail,
 	cancel,
 	ipn,
+	getMyPayments,
 };
