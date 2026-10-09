@@ -22,6 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DetailSkeleton } from "@/components/ui/skeleton";
 import { api, getErrorMessage } from "@/lib/api";
 import { getAccessToken, getStoredUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -143,11 +144,7 @@ export function BrowseDetailView({ id }: { id: string }) {
   }
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-16">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   if (needsAuth) {

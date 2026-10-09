@@ -42,6 +42,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  PageShellSkeleton,
+  RowsSkeleton,
+  StatCardsSkeleton,
+} from "@/components/ui/skeleton";
 import { api, getErrorMessage } from "@/lib/api";
 import { clearTokens, getAccessToken } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -436,9 +441,12 @@ export function ProviderDashboardView() {
 
   if (phase === "loading" || !profile) {
     return (
-      <div className="flex flex-1 items-center justify-center py-16">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
+      <PageShellSkeleton heroTabs>
+        <div className="grid gap-4">
+          <StatCardsSkeleton count={3} />
+          <RowsSkeleton count={4} />
+        </div>
+      </PageShellSkeleton>
     );
   }
 

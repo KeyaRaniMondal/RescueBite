@@ -7,7 +7,6 @@ import {
   Bell,
   CheckCircle2,
   Clock3,
-  Loader2,
   ReceiptText,
   XCircle,
 } from "lucide-react";
@@ -22,6 +21,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { RowsSkeleton } from "@/components/ui/skeleton";
 import { api, getErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -329,9 +329,7 @@ export function PaymentsView() {
             )}
 
             {loading ? (
-              <div className="flex items-center justify-center py-10">
-                <Loader2 className="size-5 animate-spin text-muted-foreground" />
-              </div>
+              <RowsSkeleton count={4} />
             ) : filteredPayments.length === 0 ? (
               <div className="rounded-md border border-dashed border-border p-6 text-center">
                 <p className="text-sm font-medium text-foreground">
@@ -410,9 +408,7 @@ export function PaymentsView() {
           </CardHeader>
           <CardContent className="grid gap-2">
             {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="size-5 animate-spin text-muted-foreground" />
-              </div>
+              <RowsSkeleton count={3} />
             ) : notices.length === 0 ? (
               <div className="rounded-md border border-dashed border-border p-6 text-center">
                 <p className="text-sm font-medium text-foreground">

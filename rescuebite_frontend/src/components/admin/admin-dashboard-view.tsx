@@ -31,6 +31,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  PageShellSkeleton,
+  RowsSkeleton,
+  StatCardsSkeleton,
+} from "@/components/ui/skeleton";
 import { api, getErrorMessage } from "@/lib/api";
 import { clearTokens, getAccessToken } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -488,9 +493,12 @@ export function AdminDashboardView() {
 
   if (phase === "loading" || !stats) {
     return (
-      <div className="flex flex-1 items-center justify-center py-16">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
+      <PageShellSkeleton heroTabs>
+        <div className="grid gap-4">
+          <StatCardsSkeleton />
+          <RowsSkeleton count={6} />
+        </div>
+      </PageShellSkeleton>
     );
   }
 
@@ -922,9 +930,7 @@ function UsersManager({ pageSize }: { pageSize: number }) {
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-10">
-            <Loader2 className="size-5 animate-spin text-muted-foreground" />
-          </div>
+          <RowsSkeleton count={5} />
         ) : users.length === 0 ? (
           <div className="rounded-md border border-dashed border-border p-6 text-center">
             <p className="text-sm font-medium text-foreground">

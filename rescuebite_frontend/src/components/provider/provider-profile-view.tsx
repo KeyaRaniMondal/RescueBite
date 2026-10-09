@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  ArrowRight,
-  BadgeCheck,
-  Loader2,
-  MapPin,
-  Phone,
-  Store,
-} from "lucide-react";
+import { ArrowRight, BadgeCheck, MapPin, Phone, Store } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -25,6 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FormSkeleton } from "@/components/ui/skeleton";
 import { api, getErrorMessage } from "@/lib/api";
 import { clearTokens, getAccessToken } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -137,11 +131,7 @@ export function ProviderProfileView() {
       </section>
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
-        {phase === "loading" && (
-          <div className="flex justify-center py-16">
-            <Loader2 className="size-6 animate-spin text-muted-foreground" />
-          </div>
-        )}
+        {phase === "loading" && <FormSkeleton fields={5} />}
 
         {phase === "error" && (
           <div className="flex justify-center">

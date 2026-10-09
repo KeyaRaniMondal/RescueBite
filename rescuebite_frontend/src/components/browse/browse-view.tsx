@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, MapPin, Package, Search } from "lucide-react";
+import { MapPin, Package, Search } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ListingGridSkeleton } from "@/components/ui/skeleton";
 import { api, getErrorMessage } from "@/lib/api";
 import { getAccessToken } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -185,11 +186,7 @@ export function BrowseView() {
       </section>
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
-        {loading && (
-          <div className="flex justify-center py-16">
-            <Loader2 className="size-6 animate-spin text-muted-foreground" />
-          </div>
-        )}
+        {loading && <ListingGridSkeleton />}
 
         {!loading && needsAuth && (
           <div className="flex justify-center">

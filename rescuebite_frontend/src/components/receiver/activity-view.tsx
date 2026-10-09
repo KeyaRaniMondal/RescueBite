@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RowsSkeleton } from "@/components/ui/skeleton";
 import { api, getErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -297,9 +298,7 @@ export function ActivityView() {
             )}
 
             {loading ? (
-              <div className="flex items-center justify-center py-10">
-                <Loader2 className="size-5 animate-spin text-muted-foreground" />
-              </div>
+              <RowsSkeleton count={4} />
             ) : filtered.length === 0 ? (
               <div className="rounded-md border border-dashed border-border p-6 text-center">
                 <p className="text-sm font-medium text-foreground">

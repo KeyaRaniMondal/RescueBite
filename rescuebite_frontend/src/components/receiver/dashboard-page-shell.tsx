@@ -1,6 +1,5 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import { ActivityView } from "@/components/receiver/activity-view";
 import { DashboardHero } from "@/components/receiver/dashboard-hero";
 import { PaymentsView } from "@/components/receiver/payments-view";
@@ -14,6 +13,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  PageShellSkeleton,
+  RowsSkeleton,
+  StatCardsSkeleton,
+} from "@/components/ui/skeleton";
 
 export function DashboardPageShell({
   view,
@@ -24,9 +28,12 @@ export function DashboardPageShell({
 
   if (phase === "loading") {
     return (
-      <div className="flex flex-1 items-center justify-center py-16">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
+      <PageShellSkeleton heroTabs>
+        <div className="grid gap-4">
+          <StatCardsSkeleton />
+          <RowsSkeleton count={5} />
+        </div>
+      </PageShellSkeleton>
     );
   }
 
