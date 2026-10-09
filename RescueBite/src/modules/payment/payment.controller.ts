@@ -18,7 +18,7 @@ const frontendBaseUrl = (): string => {
 	const raw =
 		typeof config.frontend_url === "string" && config.frontend_url.trim()
 			? config.frontend_url.trim()
-			: "http://localhost:3000";
+			:"https://rescuebite-frontend.onrender.com"; //"http://localhost:3000"
 	return raw.replace(/\/+$/, "");
 };
 
