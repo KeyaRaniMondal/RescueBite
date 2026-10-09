@@ -8,11 +8,13 @@ import {
   Minus,
   Package,
   Plus,
+  ShoppingBasket,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 import type { FoodListing } from "@/components/browse/browse-view";
+import { useCart } from "@/components/cart/cart-context";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -59,6 +61,7 @@ function formatLabel(value: string): string {
 
 export function BrowseDetailView({ id }: { id: string }) {
   const router = useRouter();
+  const { addItem } = useCart();
   const [listing, setListing] = useState<FoodListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -338,6 +341,28 @@ export function BrowseDetailView({ id }: { id: string }) {
               >
                 {reserving && <Loader2 className="animate-spin" />}
                 {reserving ? "Reserving..." : "Reserve now"}
+              </Button>
+              <Button
+                type="button"
+                size="lg"
+                variant="outline"
+                className="w-full"
+                onClick={() =>
+                  listing &&
+                  addItem({
+                    listingId: listing.id,
+                    foodName: listing.foodName,
+                    price: listing.price,
+                    unit: listing.unit,
+                    pickupLocation: listing.pickupLocation,
+                    image: listing.images?.[0],
+                    quantity,
+                    maxQuantity: maxQuantity,
+                  })
+                }
+              >
+                <ShoppingBasket />
+                Add to cart
               </Button>
               <Button
                 size="lg"

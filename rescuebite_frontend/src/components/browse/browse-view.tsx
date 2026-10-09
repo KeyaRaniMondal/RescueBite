@@ -1,8 +1,9 @@
 "use client";
 
-import { MapPin, Package, Search } from "lucide-react";
+import { MapPin, Package, Search, ShoppingBasket } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useCart } from "@/components/cart/cart-context";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -74,6 +75,7 @@ function formatLabel(value: string): string {
 }
 
 export function BrowseView() {
+  const { addItem } = useCart();
   const [listings, setListings] = useState<FoodListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -304,7 +306,29 @@ export function BrowseView() {
                     <span className="truncate">{item.pickupLocation}</span>
                   </p>
                 </CardContent>
-                <CardFooter className="mt-auto justify-end">
+                <CardFooter className="mt-auto justify-end gap-2">
+                  {(item.status === "AVAILABLE" ||
+                    item.status === "PARTIALLY_RESERVED") && (
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        addItem({
+                          listingId: item.id,
+                          foodName: item.foodName,
+                          price: item.price,
+                          unit: item.unit,
+                          pickupLocation: item.pickupLocation,
+                          image: item.images?.[0],
+                          quantity: 1,
+                          maxQuantity: Math.max(1, item.quantity),
+                        })
+                      }
+                      aria-label={`Add ${item.foodName} to cart`}
+                    >
+                      <ShoppingBasket />
+                      Add
+                    </Button>
+                  )}
                   <Button render={<Link href={`/browse/${item.id}`} />}>
                     View details
                   </Button>

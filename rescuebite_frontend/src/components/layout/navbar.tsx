@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useCart } from "@/components/cart/cart-context";
 import { type AuthUser, clearTokens, getStoredUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,7 @@ export function Navbar({ variant = "marketing", userName }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [storedUser, setStoredUser] = useState<AuthUser | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { count } = useCart();
 
   const navLinks = variant === "app" ? APP_LINKS : MARKETING_LINKS;
 
@@ -115,15 +117,19 @@ export function Navbar({ variant = "marketing", userName }: NavbarProps) {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          {variant === "marketing" && (
-            <Link
-              href="/browse"
-              className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#0f3d2e] transition-colors hover:bg-white/90"
-            >
-              <ShoppingBasket aria-hidden className="size-4" />
-              Cart
-            </Link>
-          )}
+          <Link
+            href="/cart"
+            aria-label={`Cart, ${count} items`}
+            className="relative flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#0f3d2e] transition-colors hover:bg-white/90"
+          >
+            <ShoppingBasket aria-hidden className="size-4" />
+            Cart
+            {count > 0 && (
+              <span className="absolute -top-2 -right-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-400 px-1 text-[11px] font-bold text-[#0f3d2e]">
+                {count > 99 ? "99+" : count}
+              </span>
+            )}
+          </Link>
 
           {isAuthed ? (
             <div className="relative" ref={menuRef}>
@@ -232,6 +238,23 @@ export function Navbar({ variant = "marketing", userName }: NavbarProps) {
               {link.label}
             </Link>
           ))}
+
+          <Link
+            href="/cart"
+            onClick={() => setIsOpen(false)}
+            className={cn(
+              "flex items-center gap-2 rounded-sm px-4 py-3 text-sm font-medium text-white/90 hover:bg-white/10",
+              pathname === "/cart" && "text-amber-400",
+            )}
+          >
+            <ShoppingBasket className="size-4" />
+            Cart
+            {count > 0 && (
+              <span className="ml-auto rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-bold text-[#0f3d2e]">
+                {count > 99 ? "99+" : count}
+              </span>
+            )}
+          </Link>
 
           <div className="mt-2 border-t border-white/10 pt-3">
             {isAuthed ? (
