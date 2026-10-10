@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/card";
 import { DetailSkeleton } from "@/components/ui/skeleton";
 import { api, getErrorMessage } from "@/lib/api";
-import { getAccessToken, getStoredUser } from "@/lib/auth";
+import { getStoredUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 type ListingResponse = {
@@ -65,7 +65,6 @@ export function BrowseDetailView({ id }: { id: string }) {
   const [listing, setListing] = useState<FoodListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [needsAuth, setNeedsAuth] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [reserving, setReserving] = useState(false);
   const [reserveError, setReserveError] = useState("");
@@ -80,11 +79,6 @@ export function BrowseDetailView({ id }: { id: string }) {
     async function load() {
       setLoading(true);
       setError("");
-      if (!getAccessToken()) {
-        setNeedsAuth(true);
-        setLoading(false);
-        return;
-      }
       try {
         const response = (await api(`/food-listings/${id}`)) as ListingResponse;
         if (cancelled) return;
@@ -92,16 +86,7 @@ export function BrowseDetailView({ id }: { id: string }) {
         setQuantity(1);
       } catch (err) {
         if (cancelled) return;
-        const message = getErrorMessage(err);
-        if (
-          /authentication required|invalid or expired token|unauthorized/i.test(
-            message,
-          )
-        ) {
-          setNeedsAuth(true);
-        } else {
-          setError(message);
-        }
+        setError(getErrorMessage(err));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -148,34 +133,6 @@ export function BrowseDetailView({ id }: { id: string }) {
 
   if (loading) {
     return <DetailSkeleton />;
-  }
-
-  if (needsAuth) {
-    return (
-      <div className="flex justify-center">
-        <Card className="w-full max-w-lg">
-          <CardHeader>
-            <CardTitle>Sign in to view this food</CardTitle>
-            <CardDescription>
-              Listing details are available to signed-in members.
-            </CardDescription>
-          </CardHeader>
-          <CardFooter className="gap-2">
-            <Button size="lg" render={<Link href="/login" />}>
-              Sign in
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              render={<Link href="/browse" />}
-            >
-              <ArrowLeft />
-              All foods
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    );
   }
 
   if (error || !listing) {

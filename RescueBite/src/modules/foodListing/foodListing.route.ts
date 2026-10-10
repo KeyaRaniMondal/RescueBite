@@ -19,7 +19,7 @@ router.post(
 	FoodListingController.createFoodListing,
 );
 
-router.get("/", authenticate, FoodListingController.getAllFoodListings);
+router.get("/", FoodListingController.getAllFoodListings);
 
 router.get(
 	"/my",
@@ -28,7 +28,7 @@ router.get(
 	FoodListingController.getMyFoodListings,
 );
 
-router.get("/:id", authenticate, FoodListingController.getFoodListing);
+router.get("/:id", FoodListingController.getFoodListing);
 
 router.patch(
 	"/:id/status",

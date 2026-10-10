@@ -17,7 +17,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ListingGridSkeleton } from "@/components/ui/skeleton";
 import { api, getErrorMessage } from "@/lib/api";
-import { getAccessToken } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 export type FoodListing = {
@@ -79,7 +78,6 @@ export function BrowseView() {
   const [listings, setListings] = useState<FoodListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [needsAuth, setNeedsAuth] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("ALL");
@@ -97,13 +95,6 @@ export function BrowseView() {
     async function load() {
       setLoading(true);
       setError("");
-      if (!getAccessToken()) {
-        setNeedsAuth(true);
-        setListings([]);
-        setLoading(false);
-        return;
-      }
-      setNeedsAuth(false);
       try {
         const params = new URLSearchParams();
         if (debouncedSearch) params.set("search", debouncedSearch);
@@ -116,17 +107,7 @@ export function BrowseView() {
         setListings(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         if (cancelled) return;
-        const message = getErrorMessage(err);
-        if (
-          /authentication required|invalid or expired token|unauthorized/i.test(
-            message,
-          )
-        ) {
-          setNeedsAuth(true);
-          setListings([]);
-        } else {
-          setError(message);
-        }
+        setError(getErrorMessage(err));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -190,33 +171,7 @@ export function BrowseView() {
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
         {loading && <ListingGridSkeleton />}
 
-        {!loading && needsAuth && (
-          <div className="flex justify-center">
-            <Card className="w-full max-w-lg">
-              <CardHeader>
-                <CardTitle>Sign in to browse food</CardTitle>
-                <CardDescription>
-                  The marketplace is available to signed-in members. Sign in to
-                  see all surplus food near you.
-                </CardDescription>
-              </CardHeader>
-              <CardFooter className="gap-2">
-                <Button size="lg" render={<Link href="/login" />}>
-                  Sign in
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  render={<Link href="/register" />}
-                >
-                  Create account
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
-        )}
-
-        {!loading && !needsAuth && error && (
+        {!loading && error && (
           <div className="flex justify-center">
             <Card className="w-full max-w-lg">
               <CardHeader>
@@ -232,7 +187,7 @@ export function BrowseView() {
           </div>
         )}
 
-        {!loading && !needsAuth && !error && visibleListings.length === 0 && (
+        {!loading && !error && visibleListings.length === 0 && (
           <div className="flex justify-center">
             <Card className="w-full max-w-lg">
               <CardHeader>
@@ -260,7 +215,7 @@ export function BrowseView() {
           </div>
         )}
 
-        {!loading && !needsAuth && !error && visibleListings.length > 0 && (
+        {!loading && !error && visibleListings.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {visibleListings.map((item) => (
               <Card key={item.id} className="flex w-full flex-col">
