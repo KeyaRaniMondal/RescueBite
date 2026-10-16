@@ -7,6 +7,7 @@ import {
   ChartColumn,
   ClipboardList,
   Clock,
+  ImagePlus,
   Leaf,
   Loader2,
   MapPin,
@@ -17,6 +18,7 @@ import {
   Store,
   TicketCheck,
   UserRound,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -115,6 +117,12 @@ const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   EXPIRED: [],
   CANCELLED: [],
 };
+
+/** Mirrors EDITABLE_STATUSES in the backend food-listing service. */
+const EDITABLE_STATUSES = ["DRAFT", "AVAILABLE", "PARTIALLY_RESERVED"];
+
+const MAX_LISTING_IMAGES = 5;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 const LISTING_STATUSES = [
   "AVAILABLE",
@@ -634,8 +642,8 @@ function ListingsSection({
               <div>
                 <CardTitle>My listings</CardTitle>
                 <CardDescription>
-                  Create, edit, publish, and retire your surplus food. Only
-                  drafts can be edited.
+                  Create, edit, publish, and retire your surplus food. Drafts,
+                  available, and partially-reserved listings can be edited.
                 </CardDescription>
               </div>
               <Button onClick={() => setShowForm(true)}>
@@ -770,9 +778,18 @@ function ListingRow({
   return (
     <div className="grid gap-3 rounded-md border border-border p-3">
       <div className="flex items-start gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-brand-deep/5 text-brand-deep">
-          <Package className="size-5" />
-        </div>
+        {item.images?.[0] ? (
+          // biome-ignore lint/performance/noImgElement: backend returns remote URLs; next/image remote config not set up.
+          <img
+            src={item.images[0]}
+            alt={item.foodName}
+            className="size-10 shrink-0 rounded-md object-cover"
+          />
+        ) : (
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-brand-deep/5 text-brand-deep">
+            <Package className="size-5" />
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-foreground">
             {item.foodName}
@@ -802,7 +819,7 @@ function ListingRow({
         </p>
       )}
       <div className="flex flex-wrap items-center gap-2">
-        {item.status === "DRAFT" && (
+        {EDITABLE_STATUSES.includes(item.status) && (
           <Button size="sm" variant="outline" onClick={onEdit}>
             Edit
           </Button>
@@ -912,6 +929,18 @@ function ListingForm({
   >({});
   const [saving, setSaving] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [existingImages, setExistingImages] = useState<string[]>(
+    Array.isArray(initial?.images) ? initial.images : [],
+  );
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newPreviews, setNewPreviews] = useState<string[]>([]);
+  const [imageError, setImageError] = useState("");
+
+  useEffect(() => {
+    return () => {
+      for (const url of newPreviews) URL.revokeObjectURL(url);
+    };
+  }, [newPreviews]);
 
   function update<K extends keyof ListingFormValues>(
     key: K,
@@ -919,6 +948,54 @@ function ListingForm({
   ) {
     setValues((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: undefined }));
+  }
+
+  function handleFiles(selected: FileList | null) {
+    if (!selected) return;
+    setImageError("");
+    const incoming = Array.from(selected).filter((file) =>
+      file.type.startsWith("image/"),
+    );
+    if (incoming.length !== selected.length) {
+      setImageError("Only image files are allowed.");
+    }
+    const valid: File[] = [];
+    for (const file of incoming) {
+      if (file.size > MAX_IMAGE_BYTES) {
+        setImageError(
+          `"${file.name}" exceeds 5MB and was skipped.`,
+        );
+        continue;
+      }
+      valid.push(file);
+    }
+    const slotsLeft =
+      MAX_LISTING_IMAGES - existingImages.length - newFiles.length;
+    if (valid.length > slotsLeft) {
+      setImageError(
+        `At most ${MAX_LISTING_IMAGES} images are allowed. Only the first ${Math.max(0, slotsLeft)} were kept.`,
+      );
+    }
+    const kept = valid.slice(0, Math.max(0, slotsLeft));
+    if (kept.length === 0) return;
+    setNewFiles((prev) => [...prev, ...kept]);
+    setNewPreviews((prev) => [
+      ...prev,
+      ...kept.map((file) => URL.createObjectURL(file)),
+    ]);
+  }
+
+  function removeExisting(url: string) {
+    setExistingImages((prev) => prev.filter((item) => item !== url));
+  }
+
+  function removeNew(index: number) {
+    setNewFiles((prev) => prev.filter((_, i) => i !== index));
+    setNewPreviews((prev) => {
+      const revoked = prev[index];
+      if (revoked) URL.revokeObjectURL(revoked);
+      return prev.filter((_, i) => i !== index);
+    });
   }
 
   function validate(): boolean {
@@ -949,6 +1026,10 @@ function ListingForm({
     if (!Number.isNaN(end) && !Number.isNaN(expiry) && expiry < end)
       next.expiryTime = "Expiry must be at or after pickup end.";
     setErrors(next);
+    if (existingImages.length + newFiles.length > MAX_LISTING_IMAGES) {
+      setImageError(`At most ${MAX_LISTING_IMAGES} images are allowed.`);
+      return false;
+    }
     return Object.keys(next).length === 0;
   }
 
@@ -958,22 +1039,36 @@ function ListingForm({
     setSubmitError("");
     setSaving(true);
     try {
-      const body = {
-        foodName: values.foodName.trim(),
-        description: values.description.trim(),
-        category: values.category,
-        quantity: Number(values.quantity),
-        unit: values.unit.trim(),
-        price: Number(values.price),
-        pickupLocation: values.pickupLocation.trim(),
-        pickupStartTime: new Date(values.pickupStartTime).toISOString(),
-        pickupEndTime: new Date(values.pickupEndTime).toISOString(),
-        expiryTime: new Date(values.expiryTime).toISOString(),
-        ...(initial ? {} : { status: values.status }),
-      };
+      const formData = new FormData();
+      formData.append("foodName", values.foodName.trim());
+      formData.append("description", values.description.trim());
+      formData.append("category", values.category);
+      formData.append("quantity", String(Number(values.quantity)));
+      formData.append("unit", values.unit.trim());
+      formData.append("price", String(Number(values.price)));
+      formData.append("pickupLocation", values.pickupLocation.trim());
+      formData.append(
+        "pickupStartTime",
+        new Date(values.pickupStartTime).toISOString(),
+      );
+      formData.append(
+        "pickupEndTime",
+        new Date(values.pickupEndTime).toISOString(),
+      );
+      formData.append("expiryTime", new Date(values.expiryTime).toISOString());
+      if (!initial) {
+        formData.append("status", values.status);
+      }
+      // Kept URLs go as `images`; new uploads go as `files` (backend merges).
+      for (const url of existingImages) formData.append("images", url);
+      if (initial && existingImages.length === 0) {
+        // Explicit clear signal when an edit removes every image.
+        formData.append("images", JSON.stringify([]));
+      }
+      for (const file of newFiles) formData.append("files", file);
       const response = (await api(
         initial ? `/food-listings/${initial.id}` : "/food-listings",
-        { method: initial ? "PATCH" : "POST", body },
+        { method: initial ? "PATCH" : "POST", body: formData },
       )) as ListingResponse;
       onSaved(response.data);
     } catch (error) {
@@ -988,11 +1083,11 @@ function ListingForm({
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>{initial ? "Edit draft listing" : "New listing"}</CardTitle>
+        <CardTitle>{initial ? "Edit listing" : "New listing"}</CardTitle>
         <CardDescription>
           {initial
-            ? "Only drafts can be edited. Publish it when it's ready for neighbors."
-            : "Save as a draft to polish later, or publish straight away."}
+            ? "Update the details or photos below. Publish it when it's ready for neighbors."
+            : "Add photos, save as a draft to polish later, or publish straight away."}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit} noValidate>
@@ -1114,6 +1209,84 @@ function ListingForm({
               </select>
             </div>
           )}
+          <div className="grid gap-1.5 sm:col-span-2">
+            <Label htmlFor="listing-images">
+              Food photos ({existingImages.length + newFiles.length}/
+              {MAX_LISTING_IMAGES})
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              {existingImages.map((url) => (
+                <div
+                  key={url}
+                  className="relative size-20 overflow-hidden rounded-md border border-border"
+                >
+                  {/* biome-ignore lint/performance/noImgElement: preview of remote Cloudinary URL */}
+                  <img
+                    src={url}
+                    alt="Listing"
+                    className="size-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeExisting(url)}
+                    aria-label="Remove photo"
+                    className="absolute top-1 right-1 flex size-5 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </div>
+              ))}
+              {newPreviews.map((url, index) => (
+                <div
+                  key={url}
+                  className="relative size-20 overflow-hidden rounded-md border border-dashed border-brand-amber"
+                >
+                  {/* biome-ignore lint/performance/noImgElement: local object-URL preview */}
+                  <img
+                    src={url}
+                    alt="New upload"
+                    className="size-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeNew(index)}
+                    aria-label="Remove new photo"
+                    className="absolute top-1 right-1 flex size-5 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </div>
+              ))}
+              {existingImages.length + newFiles.length <
+                MAX_LISTING_IMAGES && (
+                <label
+                  htmlFor="listing-images"
+                  className="flex size-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary"
+                >
+                  <ImagePlus className="size-5" />
+                  <span className="text-[10px] font-medium">Add photo</span>
+                </label>
+              )}
+            </div>
+            <input
+              id="listing-images"
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                handleFiles(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Up to {MAX_LISTING_IMAGES} images, 5MB each. First photo is shown
+              as the cover.
+            </p>
+            {imageError && (
+              <p className="text-xs text-destructive">{imageError}</p>
+            )}
+          </div>
           {submitError && (
             <p className="rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive sm:col-span-2">
               {submitError}

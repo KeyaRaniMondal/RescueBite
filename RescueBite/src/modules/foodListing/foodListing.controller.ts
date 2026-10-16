@@ -31,9 +31,33 @@ const getListingId = (req: Request): string => {
 	return id;
 };
 
+// Merge `images` / `images[]` multipart fields into a single `images` value
+// (array or JSON string) so zod validation sees a consistent shape.
+const normalizeListingBody = (body: unknown): Record<string, unknown> => {
+	if (!body || typeof body !== "object" || Array.isArray(body)) {
+		return {};
+	}
+	const record = body as Record<string, unknown>;
+	const normalized: Record<string, unknown> = { ...record };
+	const bracketed = record["images[]"];
+	if (bracketed !== undefined && record.images === undefined) {
+		normalized.images = bracketed;
+	} else if (bracketed !== undefined) {
+		const primary = Array.isArray(record.images)
+			? record.images
+			: record.images !== undefined
+				? [record.images]
+				: [];
+		const extra = Array.isArray(bracketed) ? bracketed : [bracketed];
+		normalized.images = [...primary, ...extra];
+	}
+	delete normalized["images[]"];
+	return normalized;
+};
+
 const createFoodListing = catchAsync(async (req: Request, res: Response) => {
 	const parsed = FoodListingValidation.CreateFoodListingZodSchema.safeParse(
-		req.body,
+		normalizeListingBody(req.body),
 	);
 
 	if (!parsed.success) {
@@ -205,7 +229,7 @@ const getAllFoodListings = catchAsync(async (req: Request, res: Response) => {
 
 const updateFoodListing = catchAsync(async (req: Request, res: Response) => {
 	const parsed = FoodListingValidation.UpdateFoodListingZodSchema.safeParse(
-		req.body,
+		normalizeListingBody(req.body),
 	);
 
 	if (!parsed.success) {

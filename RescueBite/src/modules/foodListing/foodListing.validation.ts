@@ -4,6 +4,36 @@ import { FoodCategory, FoodStatus } from "../../generated/prisma/enums";
 const foodCategoryValues = Object.values(FoodCategory) as [string, ...string[]];
 const foodStatusValues = Object.values(FoodStatus) as [string, ...string[]];
 
+// Multipart FormData sends every field as a string, so `images` may arrive as
+// a JSON string ('["url1","url2"]'), a single URL string, or an array.
+// Normalize all of those to string[] before validation.
+const imagesSchema = z.preprocess(
+	(value) => {
+		if (value === undefined || value === null || value === "") {
+			return undefined;
+		}
+		if (typeof value === "string") {
+			const trimmed = value.trim();
+			if (!trimmed) return undefined;
+			try {
+				const parsed: unknown = JSON.parse(trimmed);
+				if (Array.isArray(parsed)) return parsed;
+				if (typeof parsed === "string" && parsed.trim()) {
+					return [parsed.trim()];
+				}
+				return parsed;
+			} catch {
+				return [trimmed];
+			}
+		}
+		return value;
+	},
+	z
+		.array(z.string("Each image must be a string").min(1, "Image URL cannot be empty"))
+		.max(5, "At most 5 images are allowed")
+		.optional(),
+);
+
 const CreateFoodListingZodSchema = z
 	.object({
 		foodName: z
@@ -31,7 +61,7 @@ const CreateFoodListingZodSchema = z
 		pickupStartTime: z.string("Pickup start time is required"),
 		pickupEndTime: z.string("Pickup end time is required"),
 		expiryTime: z.string("Expiry time is required"),
-		images: z.array(z.string("Each image must be a string")).optional(),
+		images: imagesSchema,
 		status: z.enum(foodStatusValues).optional(),
 	})
 	.refine(
@@ -94,7 +124,7 @@ const UpdateFoodListingZodSchema = z
 		pickupStartTime: z.string("Pickup start time is required").optional(),
 		pickupEndTime: z.string("Pickup end time is required").optional(),
 		expiryTime: z.string("Expiry time is required").optional(),
-		images: z.array(z.string("Each image must be a string")).optional(),
+		images: imagesSchema,
 	})
 	.refine(
 		(data) => {

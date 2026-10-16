@@ -92,16 +92,76 @@ export const bindMultipleUploadToBody = (): RequestHandler => {
 	return (req: Request, res: Response, next: NextFunction) => {
 		const files = req.files as Express.Multer.File[] | undefined;
 
+		const parseExistingImages = (raw: unknown): string[] => {
+			if (raw === undefined || raw === null) return [];
+			if (Array.isArray(raw)) {
+				const out: string[] = [];
+				for (const item of raw) {
+					if (typeof item !== "string") continue;
+					const trimmed = item.trim();
+					if (!trimmed) continue;
+					if (trimmed.startsWith("[")) {
+						try {
+							const parsed: unknown = JSON.parse(trimmed);
+							if (Array.isArray(parsed)) {
+								for (const url of parsed) {
+									if (typeof url === "string" && url.trim()) {
+										out.push(url.trim());
+									}
+								}
+								continue;
+							}
+						} catch {
+							// fall through to treat as a single url
+						}
+					}
+					out.push(trimmed);
+				}
+				return out;
+			}
+			if (typeof raw === "string") {
+				const trimmed = raw.trim();
+				if (!trimmed) return [];
+				try {
+					const parsed: unknown = JSON.parse(trimmed);
+					if (Array.isArray(parsed)) {
+						return parsed.filter(
+							(url): url is string =>
+								typeof url === "string" && url.trim().length > 0,
+						);
+					}
+					if (typeof parsed === "string" && parsed.trim()) {
+						return [parsed.trim()];
+					}
+				} catch {
+					// plain URL string, not JSON
+				}
+				return [trimmed];
+			}
+			return [];
+		};
+
+		// Support both `images` and `images[]` field names from FormData.
+		const existingImages = [
+			...parseExistingImages(req.body?.images),
+			...parseExistingImages(req.body?.["images[]"]),
+		];
+
 		if (!files?.length) {
+			// Normalize so downstream zod validation always sees an array.
+			if (existingImages.length > 0) {
+				req.body = { ...req.body, images: existingImages };
+			}
 			next();
 			return;
 		}
 
 		FileUploadService.uploadImages(files)
 			.then((results) => {
+				const uploaded = results.map((result) => result.secureUrl);
 				req.body = {
 					...req.body,
-					images: results.map((result) => result.secureUrl),
+					images: [...existingImages, ...uploaded].slice(0, 5),
 				};
 				next();
 			})

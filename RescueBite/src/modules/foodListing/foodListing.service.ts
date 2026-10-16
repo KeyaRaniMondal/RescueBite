@@ -256,10 +256,19 @@ const updateListing = async (
 		);
 	}
 
-	if (existing.status !== FoodStatus.DRAFT) {
+	// Providers can update their own listings while the food is still
+	// actionable. Terminal states (expired/cancelled) are immutable, and
+	// fully-reserved listings are driven by reservations instead.
+	const EDITABLE_STATUSES: FoodStatus[] = [
+		FoodStatus.DRAFT,
+		FoodStatus.AVAILABLE,
+		FoodStatus.PARTIALLY_RESERVED,
+	];
+
+	if (!EDITABLE_STATUSES.includes(existing.status)) {
 		throw new AppError(
 			httpStatus.BAD_REQUEST,
-			"Only draft food listings can be updated",
+			`Only ${EDITABLE_STATUSES.join(", ")} food listings can be updated`,
 		);
 	}
 
