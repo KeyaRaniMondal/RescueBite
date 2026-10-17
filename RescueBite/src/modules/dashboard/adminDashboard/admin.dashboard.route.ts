@@ -3,6 +3,7 @@ import { authenticate, authorizeRoles } from "../../../middlewares/auth";
 import { Role } from "../../../generated/prisma/enums";
 import { DashboardController } from "./admin.dashboard.controller";
 import { AdminUserRoutes } from "../../admin/admin.user.route";
+import { AdminProviderRoutes } from "../../admin/admin.provider.route";
 
 const router = Router();
 
@@ -14,5 +15,7 @@ router.get(
 );
 
 router.use("/users", AdminUserRoutes);
+
+router.use("/providers", AdminProviderRoutes);
 
 export const AdminRoutes = router;

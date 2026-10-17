@@ -10,7 +10,11 @@ import type {
 	IUpdateUserRolePayload,
 } from "./admin.user.interface";
 
-const toUserListItem = (user: User): IAdminUserListItem => ({
+const toUserListItem = (
+	user: User & {
+		provider: { id: string; businessName: string; isVerified: boolean } | null;
+	},
+): IAdminUserListItem => ({
 	id: user.id,
 	name: user.name,
 	email: user.email,
@@ -19,6 +23,13 @@ const toUserListItem = (user: User): IAdminUserListItem => ({
 	emailVerified: user.emailVerified,
 	needPasswordChange: user.needPasswordChange,
 	imageUrl: user.imageUrl,
+	provider: user.provider
+		? {
+				id: user.provider.id,
+				businessName: user.provider.businessName,
+				isVerified: user.provider.isVerified,
+			}
+		: null,
 	createdAt: user.createdAt.toISOString(),
 	updatedAt: user.updatedAt.toISOString(),
 });
@@ -55,6 +66,11 @@ const getUsers = async (
 	const [users, total] = await prisma.$transaction([
 		prisma.user.findMany({
 			where,
+			include: {
+				provider: {
+					select: { id: true, businessName: true, isVerified: true },
+				},
+			},
 			skip,
 			take: limit,
 			orderBy: { createdAt: "desc" },
@@ -73,12 +89,19 @@ const getUsers = async (
 	};
 };
 
+const userSelect = {
+	provider: {
+		select: { id: true, businessName: true, isVerified: true },
+	},
+} as const;
+
 const updateUserRole = async (
 	userId: string,
 	payload: IUpdateUserRolePayload,
 ): Promise<IAdminUserListItem> => {
 	const existing = await prisma.user.findUnique({
 		where: { id: userId },
+		include: userSelect,
 	});
 
 	if (!existing) {
@@ -101,6 +124,7 @@ const updateUserRole = async (
 	const updated = await prisma.user.update({
 		where: { id: userId },
 		data: { role: payload.role },
+		include: userSelect,
 	});
 
 	return toUserListItem(updated);

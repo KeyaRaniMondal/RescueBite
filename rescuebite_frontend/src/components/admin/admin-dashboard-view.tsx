@@ -70,6 +70,11 @@ type AdminUser = {
   role: Role;
   status: string;
   emailVerified: boolean;
+  provider?: {
+    id: string;
+    businessName: string;
+    isVerified: boolean;
+  } | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -778,6 +783,7 @@ function UsersManager({ pageSize }: { pageSize: number }) {
   const [total, setTotal] = useState(0);
   const [roleDrafts, setRoleDrafts] = useState<Record<string, Role>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [verifyingId, setVerifyingId] = useState<string | null>(null);
   const [rowMessage, setRowMessage] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -856,6 +862,48 @@ function UsersManager({ pageSize }: { pageSize: number }) {
     }
   }
 
+  async function handleVerifyToggle(user: AdminUser) {
+    if (!user.provider) return;
+    const next = !user.provider.isVerified;
+    setVerifyingId(user.id);
+    setRowMessage((prev) => ({ ...prev, [user.id]: "" }));
+    try {
+      const updated = (await api(
+        `/admin/providers/${user.provider.id}/verification`,
+        {
+          method: "PATCH",
+          body: { isVerified: next },
+        },
+      )) as { data: { isVerified: boolean } };
+      setUsers((prev) =>
+        prev.map((item) =>
+          item.id === user.id && item.provider
+            ? {
+                ...item,
+                provider: {
+                  ...item.provider,
+                  isVerified: updated.data.isVerified,
+                },
+              }
+            : item,
+        ),
+      );
+      setRowMessage((prev) => ({
+        ...prev,
+        [user.id]: updated.data.isVerified
+          ? "Business verified."
+          : "Verification removed.",
+      }));
+    } catch (err) {
+      setRowMessage((prev) => ({
+        ...prev,
+        [user.id]: getErrorMessage(err, "Unable to update verification."),
+      }));
+    } finally {
+      setVerifyingId(null);
+    }
+  }
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -865,7 +913,8 @@ function UsersManager({ pageSize }: { pageSize: number }) {
         </CardTitle>
         <CardDescription>
           Search, filter, and update user roles. Role changes take effect on the
-          user&apos;s next sign-in.
+          user&apos;s next sign-in. Provider businesses can be verified here —
+          verified providers show a badge on their dashboard.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
@@ -975,6 +1024,20 @@ function UsersManager({ pageSize }: { pageSize: number }) {
                           Unverified
                         </span>
                       )}
+                      {user.provider && (
+                        <span
+                          className={cn(
+                            "rounded-sm px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase",
+                            user.provider.isVerified
+                              ? "bg-primary/10 text-primary"
+                              : "bg-brand-amber/10 text-brand-amber",
+                          )}
+                        >
+                          {user.provider.isVerified
+                            ? "Business verified"
+                            : "Business pending"}
+                        </span>
+                      )}
                     </div>
                     {rowMessage[user.id] && (
                       <p className="mt-1 text-xs text-muted-foreground">
@@ -1010,6 +1073,23 @@ function UsersManager({ pageSize }: { pageSize: number }) {
                       {saving && <Loader2 className="animate-spin" />}
                       Save
                     </Button>
+                    {user.provider && (
+                      <Button
+                        size="sm"
+                        variant={
+                          user.provider.isVerified ? "outline" : "default"
+                        }
+                        disabled={saving || verifyingId === user.id}
+                        onClick={() => handleVerifyToggle(user)}
+                      >
+                        {verifyingId === user.id && (
+                          <Loader2 className="animate-spin" />
+                        )}
+                        {user.provider.isVerified
+                          ? "Revoke verification"
+                          : "Verify business"}
+                      </Button>
+                    )}
                   </div>
                 </div>
               );
@@ -1305,6 +1385,8 @@ function ReportsSection({
             role: user.role,
             status: user.status,
             emailVerified: user.emailVerified,
+            businessName: user.provider?.businessName ?? "",
+            businessVerified: user.provider ? user.provider.isVerified : "n/a",
             createdAt: user.createdAt,
           })),
         );

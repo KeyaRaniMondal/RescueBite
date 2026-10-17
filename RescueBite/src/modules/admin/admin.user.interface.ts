@@ -9,6 +9,12 @@ export interface IAdminUserListItem {
 	emailVerified: boolean;
 	needPasswordChange: boolean;
 	imageUrl: string;
+	/** Present only for users with a provider (business) profile. */
+	provider?: {
+		id: string;
+		businessName: string;
+		isVerified: boolean;
+	} | null;
 	createdAt: string;
 	updatedAt: string;
 }
