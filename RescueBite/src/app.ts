@@ -34,6 +34,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+// Instant health check for the platform (Render) — no DB/Redis/SMTP involved,
+// so it responds in milliseconds even during a cold start.
+app.get("/health", (_req: Request, res: Response) => {
+	res.status(httpStatus.OK).json({
+		success: true,
+		statusCode: httpStatus.OK,
+		message: "OK",
+		data: { uptime: process.uptime() },
+	});
+});
+
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/provider", ProviderRoutes);
 app.use("/api/v1/food-listing", FoodListingRoutes);

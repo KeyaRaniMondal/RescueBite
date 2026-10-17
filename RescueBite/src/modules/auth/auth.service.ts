@@ -12,7 +12,7 @@ import {
 	IVerifyEmailPayload,
 } from "./auth.interface";
 import crypto from "node:crypto";
-import { redisClient } from "../../lib/redis";
+import { ensureRedisConnected, redisClient } from "../../lib/redis";
 import path from "node:path";
 import ejs from "ejs";
 import config from "../../config";
@@ -41,6 +41,9 @@ const registerCustomer = async (payload: IRegisterCustomerPayload) => {
 	const hashedPassword = await bcrypt.hash(password, 8);
 
 	//for user registration info storing in redis database untill otp is verified and after that it will be removed from redis
+
+	//connect lazily (server no longer blocks boot on Redis)
+	await ensureRedisConnected();
 
 	//for otp
 	const expirationSeconds = 5 * 60;
@@ -118,6 +121,7 @@ const verifyCustomerEmail = async (payload: IVerifyEmailPayload) => {
 	}
 
 	const otpKey = `customer registration otp: ${email}`;
+	await ensureRedisConnected();
 	const redisOtp = await redisClient.get(otpKey);
 
 	if (!redisOtp) {
@@ -330,6 +334,7 @@ const forgotPassword = async (payload: IForgotPassword) => {
 
 	const otp = crypto.randomInt(100000, 999999).toString();
 	const key = `forgot-password-otp:${isUserExists.email}`;
+	await ensureRedisConnected();
 	await redisClient.set(key, otp, {
 		expiration: {
 			type: "EX",
@@ -356,6 +361,7 @@ const resetPassword = async (payload: IResetpassword) => {
 		throw new Error("user is deleted");
 	const key = `forgot-password-otp:${isUserExists.email}`;
 
+	await ensureRedisConnected();
 	const redisOTP = await redisClient.get(key);
 	if (!redisOTP) throw new Error("invalid otp");
 	if (String(redisOTP) !== String(otp)) throw new Error("otp doesn't match");
