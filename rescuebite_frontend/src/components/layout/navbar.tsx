@@ -15,6 +15,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/components/cart/cart-context";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { type AuthUser, clearTokens, getStoredUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -117,6 +118,7 @@ export function Navbar({ variant = "marketing", userName }: NavbarProps) {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <ThemeToggle />
           <Link
             href="/cart"
             aria-label={`Cart, ${count} items`}
@@ -150,7 +152,7 @@ export function Navbar({ variant = "marketing", userName }: NavbarProps) {
               {menuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 mt-2 w-56 rounded-md border border-border bg-white p-1 text-sm text-foreground shadow-lg"
+                  className="absolute right-0 mt-2 w-56 rounded-md border border-border bg-popover p-1 text-sm text-popover-foreground shadow-lg"
                 >
                   <Link
                     href={dashboardHref}
@@ -209,15 +211,20 @@ export function Navbar({ variant = "marketing", userName }: NavbarProps) {
           )}
         </div>
 
-        <button
-          type="button"
-          aria-expanded={isOpen}
-          aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
-          onClick={() => setIsOpen((open) => !open)}
-          className="rounded-md p-2 text-white transition-colors hover:bg-white/10 lg:hidden"
-        >
-          {isOpen ? <X className="size-6" /> : <Menu className="size-6" />}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            aria-expanded={isOpen}
+            aria-label={
+              isOpen ? "Close navigation menu" : "Open navigation menu"
+            }
+            onClick={() => setIsOpen((open) => !open)}
+            className="rounded-md p-2 text-white transition-colors hover:bg-white/10"
+          >
+            {isOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+          </button>
+        </div>
       </div>
 
       {isOpen && (

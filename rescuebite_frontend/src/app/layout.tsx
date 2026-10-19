@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Roboto } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { Providers } from "@/components/providers";
+import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 const roboto = Roboto({ subsets: ["latin"], variable: "--font-sans" });
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn(
         "h-full",
         "antialiased",
@@ -35,6 +37,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         roboto.variable,
       )}
     >
+      <head>
+        {/* Applies the saved light/dark theme before the first paint. */}
+        <script
+          id="theme-bootstrap"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: static constant defined in src/lib/theme.ts
+          dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         <Providers>
           <Navbar />

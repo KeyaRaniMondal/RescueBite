@@ -3,11 +3,16 @@
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import type { ReactNode } from "react";
 import { CartProvider } from "@/components/cart/cart-context";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
 export function Providers({ children }: { children: ReactNode }) {
-  const content = <CartProvider>{children}</CartProvider>;
+  const content = (
+    <ThemeProvider>
+      <CartProvider>{children}</CartProvider>
+    </ThemeProvider>
+  );
   if (!GOOGLE_CLIENT_ID) {
     return content;
   }
