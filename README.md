@@ -1,6 +1,6 @@
 # RescueBite
 
-![RescueBite homepage](file:///c:/Users/ASUS/AppData/Roaming/Code/agentSessionData/3195cfd0-544a-4b54-aa84-104863c59013/attachments/14d70c2f-8a83-4978-8cd7-3c1c53b0c5ce/Pasted%20Image.png)
+![RescueBite homepage](rescuebite-frontend.png)
 
 RescueBite is a food-rescue marketplace that connects food providers with nearby customers so surplus food can be claimed before it goes to waste.
 
