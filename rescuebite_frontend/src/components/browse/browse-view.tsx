@@ -262,28 +262,32 @@ export function BrowseView() {
                   </p>
                 </CardContent>
                 <CardFooter className="mt-auto justify-end gap-2">
-                  {(item.status === "AVAILABLE" ||
-                    item.status === "PARTIALLY_RESERVED") && (
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        addItem({
-                          listingId: item.id,
-                          foodName: item.foodName,
-                          price: item.price,
-                          unit: item.unit,
-                          pickupLocation: item.pickupLocation,
-                          image: item.images?.[0],
-                          quantity: 1,
-                          maxQuantity: Math.max(1, item.quantity),
-                        })
-                      }
-                      aria-label={`Add ${item.foodName} to cart`}
-                    >
-                      <ShoppingBasket />
-                      Add
-                    </Button>
-                  )}
+                  <Button
+                    variant="outline"
+                    disabled={
+                      item.status !== "AVAILABLE" &&
+                      item.status !== "PARTIALLY_RESERVED"
+                    }
+                    onClick={() =>
+                      addItem({
+                        listingId: item.id,
+                        foodName: item.foodName,
+                        price: item.price,
+                        unit: item.unit,
+                        pickupLocation: item.pickupLocation,
+                        image: item.images?.[0],
+                        quantity: 1,
+                        maxQuantity: Math.max(1, item.quantity),
+                      })
+                    }
+                    aria-label={`Add ${item.foodName} to cart`}
+                  >
+                    <ShoppingBasket />
+                    {item.status === "AVAILABLE" ||
+                    item.status === "PARTIALLY_RESERVED"
+                      ? "Add to cart"
+                      : "Unavailable"}
+                  </Button>
                   <Button render={<Link href={`/browse/${item.id}`} />}>
                     View details
                   </Button>

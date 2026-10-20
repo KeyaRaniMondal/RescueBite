@@ -340,7 +340,7 @@ Access 🔓 · `application/json` · **no Zod validation**
 | --- | --- | --- |
 | `idToken` | string — Google ID token | ✅ |
 
-Verifies the token against `GOOGLE_CLIENT_ID`, links to an existing `RECEIVER` account by email or creates one (`authProvider: GOOGLE`, `emailVerified: true`, nested `Customer`).
+Verifies the token against `GOOGLE_CLIENT_ID`, then looks the account up by email: an existing account gets `googleId` linked (email must be verified; blocked/deleted rejected) and is signed in with its current role, otherwise a new `RECEIVER` user is created (`googleId` set, `emailVerified: true`, nested `customer`).
 
 ```
 200 { "success": true, "statusCode": 200, "message": "New tokens generated successfully",
